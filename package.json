@@ -1,0 +1,20 @@
+{
+  "name": "zeno-ai-assistant",
+  "version": "1.0.0",
+  "description": "Zeno AI Assistant - Premium Dashboard UI Prototype",
+  "main": "index.html",
+  "scripts": {
+    "postinstall": "npm install --prefix backend",
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js"
+  },
+  "keywords": [
+    "zeno",
+    "ai",
+    "assistant",
+    "dashboard",
+    "prototype"
+  ],
+  "author": "Antigravity",
+  "license": "ISC"
+}
