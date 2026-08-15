@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const promptInput = document.getElementById("prompt-input");
   const sendBtn = document.getElementById("send-btn");
   const attachBtn = document.getElementById("attach-btn");
+  const micBtn = document.getElementById("mic-btn");
   const fileInput = document.getElementById("file-input");
   const fileAttachmentBadge = document.getElementById("file-attachment-badge");
 
@@ -355,6 +356,326 @@ document.addEventListener("DOMContentLoaded", () => {
         loginErrorMsg.style.display = "block";
       }
     });
+  }
+
+  // ===========================================================================
+  // EMAIL OTP AUTHENTICATION & VERIFICATION CONTROLLER
+  // ===========================================================================
+  let otpTimerInterval = null;
+  let otpExpiresAt = 0;
+  let activeOtpEmail = "";
+
+  // 1. Auth Mode Tab Switching (Password vs Email OTP)
+  const authTabBtns = document.querySelectorAll(".auth-tab-btn");
+  const authViews = document.querySelectorAll(".auth-view");
+
+  authTabBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      authTabBtns.forEach(b => b.classList.remove("active"));
+      authViews.forEach(v => {
+        v.classList.remove("active");
+        v.style.display = "none";
+      });
+
+      btn.classList.add("active");
+      const targetId = btn.dataset.target;
+      const targetView = document.getElementById(targetId);
+      if (targetView) {
+        targetView.classList.add("active");
+        targetView.style.display = "block";
+      }
+    });
+  });
+
+  // 2. OTP UI Component References
+  const otpRequestForm = document.getElementById("otp-request-form");
+  const otpEmailInput = document.getElementById("otp-email-input");
+  const otpSendBtn = document.getElementById("otp-send-btn");
+  const otpRequestErrorMsg = document.getElementById("otp-request-error-msg");
+
+  const otpStepRequest = document.getElementById("otp-step-request");
+  const otpStepVerify = document.getElementById("otp-step-verify");
+  const otpTargetEmailDisplay = document.getElementById("otp-target-email-display");
+  const otpChangeEmailBtn = document.getElementById("otp-change-email-btn");
+
+  const otpDigitInputs = [
+    document.getElementById("otp-digit-1"),
+    document.getElementById("otp-digit-2"),
+    document.getElementById("otp-digit-3"),
+    document.getElementById("otp-digit-4")
+  ];
+
+  const otpTimerBadge = document.getElementById("otp-timer-badge");
+  const otpCountdownText = document.getElementById("otp-countdown-text");
+  const otpResendBtn = document.getElementById("otp-resend-btn");
+  const otpVerifyStatusMsg = document.getElementById("otp-verify-status-msg");
+  const otpVerifyBtn = document.getElementById("otp-verify-btn");
+
+  // Helper: Show/Hide button spinner
+  function setBtnLoading(btn, isLoading) {
+    if (!btn) return;
+    const btnText = btn.querySelector(".btn-text");
+    const btnSpinner = btn.querySelector(".btn-spinner");
+    btn.disabled = isLoading;
+    if (isLoading) {
+      if (btnText) btnText.style.display = "none";
+      if (btnSpinner) btnSpinner.style.display = "inline-flex";
+    } else {
+      if (btnText) btnText.style.display = "inline";
+      if (btnSpinner) btnSpinner.style.display = "none";
+    }
+  }
+
+  // Helper: Display Status Banner
+  function showOtpStatus(msg, type = "error") {
+    if (!otpVerifyStatusMsg) return;
+    otpVerifyStatusMsg.className = `otp-status-msg ${type}`;
+    otpVerifyStatusMsg.textContent = msg;
+    otpVerifyStatusMsg.style.display = "block";
+  }
+
+  function hideOtpStatus() {
+    if (otpVerifyStatusMsg) otpVerifyStatusMsg.style.display = "none";
+  }
+
+  // 3. Countdown Timer Engine (2:00 -> 00:00)
+  function startOtpCountdown(expiresAtTimestamp) {
+    if (otpTimerInterval) clearInterval(otpTimerInterval);
+    otpExpiresAt = expiresAtTimestamp;
+
+    if (otpTimerBadge) otpTimerBadge.classList.remove("expired");
+    if (otpResendBtn) otpResendBtn.disabled = true;
+
+    function updateTick() {
+      const remainingMs = otpExpiresAt - Date.now();
+      if (remainingMs <= 0) {
+        clearInterval(otpTimerInterval);
+        otpTimerInterval = null;
+        if (otpCountdownText) otpCountdownText.textContent = "00:00";
+        if (otpTimerBadge) otpTimerBadge.classList.add("expired");
+        if (otpResendBtn) otpResendBtn.disabled = false;
+        showOtpStatus("OTP Expired. Please click Resend OTP to get a new code.", "error");
+        return;
+      }
+
+      const totalSecs = Math.floor(remainingMs / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      const formatted = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      if (otpCountdownText) otpCountdownText.textContent = formatted;
+    }
+
+    updateTick();
+    otpTimerInterval = setInterval(updateTick, 1000);
+  }
+
+  // 4. Send OTP Request
+  async function triggerSendOTP(emailVal) {
+    if (!emailVal) return;
+    if (otpRequestErrorMsg) otpRequestErrorMsg.style.display = "none";
+    hideOtpStatus();
+
+    // Reset success screen view
+    const formWrap = document.getElementById("otp-verify-form-wrap");
+    const successScreen = document.getElementById("otp-success-screen");
+    if (formWrap) formWrap.style.display = "block";
+    if (successScreen) successScreen.style.display = "none";
+
+    setBtnLoading(otpSendBtn, true);
+
+    try {
+      const res = await window.ZenoAPI.sendOTP(emailVal);
+      activeOtpEmail = emailVal;
+
+      if (otpTargetEmailDisplay) otpTargetEmailDisplay.textContent = emailVal;
+
+      // Reset digit input boxes
+      otpDigitInputs.forEach(input => {
+        if (input) {
+          input.value = "";
+          input.classList.remove("filled", "shake", "typing-scale");
+        }
+      });
+
+      // Switch to Step 2 Verification view
+      if (otpStepRequest) otpStepRequest.style.display = "none";
+      if (otpStepVerify) otpStepVerify.style.display = "block";
+
+      // Start 2:00 countdown timer
+      startOtpCountdown(res.expiresAt || (Date.now() + 120000));
+
+      // Focus first digit box
+      setTimeout(() => {
+        if (otpDigitInputs[0]) otpDigitInputs[0].focus();
+      }, 100);
+
+      // Handle Live Inbox Preview link (if using auto test inbox)
+      const previewWrap = document.getElementById("otp-inbox-preview-wrap");
+      const previewBtn = document.getElementById("otp-inbox-preview-btn");
+      if (res.previewUrl && previewWrap && previewBtn) {
+        previewBtn.href = res.previewUrl;
+        previewWrap.style.display = "block";
+      } else if (previewWrap) {
+        previewWrap.style.display = "none";
+      }
+
+      showOtpStatus(`Verification code sent to ${emailVal}. Valid for 2 minutes.`, "success");
+      setTimeout(() => hideOtpStatus(), 5000);
+
+    } catch (err) {
+      if (otpRequestErrorMsg) {
+        otpRequestErrorMsg.textContent = err.message || "Failed to send OTP";
+        otpRequestErrorMsg.style.display = "block";
+      }
+    } finally {
+      setBtnLoading(otpSendBtn, false);
+    }
+  }
+
+  if (otpRequestForm) {
+    otpRequestForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const emailVal = otpEmailInput.value.trim();
+      triggerSendOTP(emailVal);
+    });
+  }
+
+  // Change Email Link Handler
+  if (otpChangeEmailBtn) {
+    otpChangeEmailBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+      hideOtpStatus();
+      if (otpStepVerify) otpStepVerify.style.display = "none";
+      if (otpStepRequest) otpStepRequest.style.display = "block";
+      if (otpEmailInput) otpEmailInput.focus();
+    });
+  }
+
+  // Resend OTP Button Handler
+  if (otpResendBtn) {
+    otpResendBtn.addEventListener("click", async () => {
+      if (!activeOtpEmail || otpResendBtn.disabled) return;
+      otpResendBtn.disabled = true;
+      try {
+        const res = await window.ZenoAPI.sendOTP(activeOtpEmail);
+        startOtpCountdown(res.expiresAt || (Date.now() + 120000));
+        otpDigitInputs.forEach(i => { if (i) { i.value = ""; i.classList.remove("filled", "typing-scale"); } });
+        if (otpDigitInputs[0]) otpDigitInputs[0].focus();
+        showOtpStatus(`New verification code sent to ${activeOtpEmail}`, "success");
+      } catch (err) {
+        showOtpStatus(err.message || "Failed to resend OTP", "error");
+        otpResendBtn.disabled = false;
+      }
+    });
+  }
+
+  // 5. 4-Digit Input Navigation (Auto-advance, Backspace, Paste)
+  otpDigitInputs.forEach((input, index) => {
+    if (!input) return;
+
+    // Handle Input & Auto-Advance
+    input.addEventListener("input", () => {
+      const val = input.value.replace(/[^0-9]/g, "");
+      input.value = val;
+
+      if (val) {
+        input.classList.add("filled", "typing-scale");
+        setTimeout(() => input.classList.remove("typing-scale"), 200);
+
+        if (index < 3 && otpDigitInputs[index + 1]) {
+          otpDigitInputs[index + 1].focus();
+        }
+      } else {
+        input.classList.remove("filled", "typing-scale");
+      }
+
+      // Auto verify if all 4 digits are entered
+      const fullCode = otpDigitInputs.map(i => (i ? i.value : "")).join("");
+      if (fullCode.length === 4) {
+        triggerVerifyOTP();
+      }
+    });
+
+    // Handle Backspace Key Navigation
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace") {
+        if (!input.value && index > 0 && otpDigitInputs[index - 1]) {
+          otpDigitInputs[index - 1].focus();
+          otpDigitInputs[index - 1].value = "";
+          otpDigitInputs[index - 1].classList.remove("filled", "typing-scale");
+        }
+      }
+    });
+
+    // Handle Clipboard Paste (Distributes 4 digits)
+    input.addEventListener("paste", (e) => {
+      e.preventDefault();
+      const pasteData = (e.clipboardData || window.clipboardData).getData("text");
+      const digits = pasteData.replace(/[^0-9]/g, "").slice(0, 4);
+
+      if (digits) {
+        digits.split("").forEach((char, idx) => {
+          if (otpDigitInputs[idx]) {
+            otpDigitInputs[idx].value = char;
+            otpDigitInputs[idx].classList.add("filled");
+          }
+        });
+
+        const lastIdx = Math.min(digits.length - 1, 3);
+        if (otpDigitInputs[lastIdx]) otpDigitInputs[lastIdx].focus();
+
+        if (digits.length === 4) {
+          triggerVerifyOTP();
+        }
+      }
+    });
+  });
+
+  // 6. Verify OTP Handler
+  async function triggerVerifyOTP() {
+    const otpCode = otpDigitInputs.map(i => (i ? i.value : "")).join("");
+
+    if (otpCode.length < 4) {
+      showOtpStatus("Please enter all 4 digits of the verification code", "warning");
+      return;
+    }
+
+    if (Date.now() > otpExpiresAt) {
+      showOtpStatus("OTP Expired. Please click Resend OTP.", "error");
+      otpDigitInputs.forEach(i => { if (i) i.classList.add("shake"); });
+      setTimeout(() => otpDigitInputs.forEach(i => { if (i) i.classList.remove("shake"); }), 500);
+      return;
+    }
+
+    hideOtpStatus();
+    setBtnLoading(otpVerifyBtn, true);
+
+    try {
+      const res = await window.ZenoAPI.verifyOTP(activeOtpEmail, otpCode);
+      if (otpTimerInterval) clearInterval(otpTimerInterval);
+
+      // Show animated green checkmark screen
+      const formWrap = document.getElementById("otp-verify-form-wrap");
+      const successScreen = document.getElementById("otp-success-screen");
+      if (formWrap) formWrap.style.display = "none";
+      if (successScreen) successScreen.style.display = "flex";
+
+      setTimeout(() => {
+        onAuthSuccess(res.user);
+      }, 1200);
+
+    } catch (err) {
+      showOtpStatus(err.message || "Invalid OTP code. Please try again.", "error");
+      otpDigitInputs.forEach(i => { if (i) i.classList.add("shake"); });
+      setTimeout(() => otpDigitInputs.forEach(i => { if (i) i.classList.remove("shake"); }), 500);
+    } finally {
+      setBtnLoading(otpVerifyBtn, false);
+    }
+  }
+
+  if (otpVerifyBtn) {
+    otpVerifyBtn.addEventListener("click", triggerVerifyOTP);
   }
 
   // Logout button triggers
@@ -864,6 +1185,70 @@ document.addEventListener("DOMContentLoaded", () => {
       reader.readAsDataURL(file);
     });
   }
+
+  // Voice Input (Microphone) integration
+  if (micBtn && window.ZenoVoice) {
+    let oldPlaceholder = "";
+    let accumulatedTranscript = "";
+    let silenceTimer = null;
+
+    function stopMicUI() {
+      micBtn.classList.remove("recording");
+      if (promptInput.placeholder === "🎙️ Listening...") {
+        promptInput.placeholder = oldPlaceholder;
+      }
+    }
+
+    micBtn.addEventListener("click", () => {
+      if (window.ZenoVoice.isListening) {
+        // Manual stop
+        if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+        window.ZenoVoice.stopListening();
+        stopMicUI();
+      } else {
+        // Start listening
+        oldPlaceholder = promptInput.placeholder;
+        promptInput.placeholder = "🎙️ Listening...";
+        accumulatedTranscript = promptInput.value;
+        if (accumulatedTranscript && !accumulatedTranscript.endsWith(" ")) {
+          accumulatedTranscript += " ";
+        }
+
+        window.ZenoVoice.startListening(
+          (transcript) => {
+            // Each result replaces the running accumulated portion
+            promptInput.value = accumulatedTranscript + transcript;
+            sendBtn.disabled = false;
+
+            // After each recognized phrase, update the base and reset silence timer
+            accumulatedTranscript = promptInput.value;
+            if (!accumulatedTranscript.endsWith(" ")) accumulatedTranscript += " ";
+
+            // 3-second silence → auto-stop
+            if (silenceTimer) clearTimeout(silenceTimer);
+            silenceTimer = setTimeout(() => {
+              if (window.ZenoVoice.isListening) {
+                window.ZenoVoice.stopListening();
+                stopMicUI();
+              }
+            }, 3000);
+          },
+          (errorMsg) => {
+            if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+            pushSystemNotification(errorMsg);
+            stopMicUI();
+          },
+          () => {
+            if (silenceTimer) { clearTimeout(silenceTimer); silenceTimer = null; }
+            stopMicUI();
+          }
+        );
+        micBtn.classList.add("recording");
+      }
+    });
+  }
+
+
 
   // ===========================================================================
   // AI AGENT WIDGET LOGIC & EVENT POPUP BUTTONS

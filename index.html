@@ -57,34 +57,141 @@
       <!-- Right Side - Sign In Form -->
       <div class="login-right">
         <div class="login-form-card">
-          <h2 class="login-form-title">Sign in to Zeno</h2>
-          <p class="login-form-subtitle">Enter your credentials to access your account</p>
-          
-          <form class="login-form" id="login-form">
-            <div class="login-input-group">
-              <label for="login-email">Username</label>
-              <input type="text" id="login-email" placeholder="e.g. hariprasad" required>
-            </div>
-            <div class="login-input-group">
-              <label for="login-password">Password</label>
-              <input type="password" id="login-password" placeholder="••••••••" required>
-            </div>
+          <!-- Auth Mode Tabs -->
+          <div class="auth-tabs" id="auth-tabs">
+            <button type="button" class="auth-tab-btn active" id="tab-btn-password" data-target="password-login-view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Password</span>
+            </button>
+            <button type="button" class="auth-tab-btn" id="tab-btn-otp" data-target="otp-login-view">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <span>Email OTP</span>
+            </button>
+          </div>
+
+          <!-- Password Login View -->
+          <div class="auth-view active" id="password-login-view">
+            <h2 class="login-form-title">Sign in to Zeno</h2>
+            <p class="login-form-subtitle">Enter your credentials to access your account</p>
             
-            <div class="login-options">
-              <label class="remember-checkbox">
-                <input type="checkbox" id="remember-me">
-                <span>Remember me</span>
-              </label>
-              <a href="#" class="forgot-password">Forgot password?</a>
+            <form class="login-form" id="login-form">
+              <div class="login-input-group">
+                <label for="login-email">Username</label>
+                <input type="text" id="login-email" placeholder="e.g. hariprasad" required>
+              </div>
+              <div class="login-input-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" required>
+              </div>
+              
+              <div class="login-options">
+                <label class="remember-checkbox">
+                  <input type="checkbox" id="remember-me">
+                  <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password">Forgot password?</a>
+              </div>
+              
+              <div class="login-error-msg" id="login-error-msg" style="display:none;">Invalid credentials</div>
+              <button type="submit" class="login-submit-btn">Sign In</button>
+              
+              <div class="login-signup-link">
+                Don't have an account? <a href="#">Sign up</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- Email OTP Login View -->
+          <div class="auth-view" id="otp-login-view" style="display:none;">
+            <!-- Step 1: Request OTP -->
+            <div id="otp-step-request" class="otp-step">
+              <h2 class="login-form-title">Email OTP Sign In</h2>
+              <p class="login-form-subtitle">Enter your registered email to receive a secure 4-digit code valid for 2 minutes.</p>
+              
+              <form class="login-form" id="otp-request-form">
+                <div class="login-input-group">
+                  <label for="otp-email-input">Registered Email Address</label>
+                  <input type="email" id="otp-email-input" placeholder="e.g. developer@zeno.ai" required autocomplete="email">
+                </div>
+                
+                <div class="login-error-msg" id="otp-request-error-msg" style="display:none;"></div>
+                
+                <button type="submit" class="login-submit-btn" id="otp-send-btn">
+                  <span class="btn-text">Send Verification Code</span>
+                  <span class="btn-spinner" style="display:none;">
+                    <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                    Sending...
+                  </span>
+                </button>
+              </form>
             </div>
-            
-            <div class="login-error-msg" id="login-error-msg" style="display:none;">Invalid credentials</div>
-            <button type="submit" class="login-submit-btn">Sign In</button>
-            
-            <div class="login-signup-link">
-              Don't have an account? <a href="#">Sign up</a>
+
+            <!-- Step 2: Verify 4-Digit OTP -->
+            <div id="otp-step-verify" class="otp-step" style="display:none;">
+              <!-- Standard Verification Form View -->
+              <div id="otp-verify-form-wrap">
+                <h2 class="login-form-title">Let's verify your email</h2>
+                <p class="login-form-subtitle">
+                  We've sent a 4-digit code to <strong id="otp-target-email-display" style="color:#ff6b00;">developer@zeno.ai</strong>. 
+                  It'll auto-verify once entered. <a href="#" id="otp-change-email-btn" class="otp-change-email-link">(Change)</a>
+                </p>
+
+                <!-- 4-Digit Inputs Container -->
+                <div class="otp-boxes-wrapper">
+                  <div class="otp-inputs-grid">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-1" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-2" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-3" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-4" autocomplete="off">
+                  </div>
+                </div>
+
+                <!-- Live Timer & Resend Option -->
+                <div class="otp-meta-row">
+                  <div class="otp-timer-badge" id="otp-timer-badge">
+                    <span class="timer-dot">●</span>
+                    <span>Expires in <strong id="otp-countdown-text">02:00</strong></span>
+                  </div>
+                  <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
+                    <span>Resend OTP</span>
+                  </button>
+                </div>
+
+                <!-- Live Test Inbox Preview Link -->
+                <div id="otp-inbox-preview-wrap" style="display:none; margin-bottom: 1rem; text-align: center;">
+                  <a href="#" id="otp-inbox-preview-btn" target="_blank" class="otp-inbox-preview-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span>📬 Open Delivered Email in Live Inbox</span>
+                  </a>
+                </div>
+
+                <!-- Status Banner -->
+                <div class="otp-status-msg" id="otp-verify-status-msg" style="display:none;"></div>
+
+                <!-- Verify Button -->
+                <button type="button" class="login-submit-btn" id="otp-verify-btn">
+                  <span class="btn-text">Verify &amp; Sign In</span>
+                  <span class="btn-spinner" style="display:none;">
+                    <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                    Verifying...
+                  </span>
+                </button>
+              </div>
+
+              <!-- Animated Green Checkmark Success View -->
+              <div id="otp-success-screen" class="otp-success-screen" style="display:none;">
+                <div class="checkmark-circle">
+                  <svg class="checkmark-icon" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle-bg" cx="26" cy="26" r="23" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                  </svg>
+                </div>
+                <h3 class="otp-success-title">Verified Successfully</h3>
+                <p class="otp-success-subtitle">Redirecting to your Zeno workspace...</p>
+              </div>
+              </div>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -384,6 +491,9 @@
         <div class="input-container">
           <button class="input-action-btn" id="attach-btn" title="Attach file">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+          </button>
+          <button class="input-action-btn" id="mic-btn" title="Voice Input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
           </button>
           <input type="file" id="file-input" style="display:none;" multiple>
           <span class="file-attachment-badge" id="file-attachment-badge"></span>
@@ -707,6 +817,7 @@
   <script src="js/storage.js"></script>
   <script src="js/providers.js"></script>
   <script src="js/chat-engine.js"></script>
+  <script src="js/voice-engine.js"></script>
   <script src="js/background.js?v=12"></script>
   <script src="js/agent-mode.js?v=10"></script>
   <script src="js/modes.js?v=5"></script>

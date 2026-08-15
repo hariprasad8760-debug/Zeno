@@ -1418,6 +1418,17 @@ html[data-accent-theme="violet"] .action-card:hover .card-icon { background: rgb
   height: 13px;
 }
 
+.msg-action-btn.speaker-btn.playing {
+  color: var(--accent-color);
+  animation: pulse-speaker 1.5s infinite;
+}
+
+@keyframes pulse-speaker {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
 /* Typing Indicator Styling */
 .typing-indicator {
   display: none;
@@ -1535,6 +1546,17 @@ html[data-accent-theme="violet"] .action-card:hover .card-icon { background: rgb
 .input-action-btn svg {
   width: 18px;
   height: 18px;
+}
+
+#mic-btn.recording {
+  color: #ef4444;
+  animation: pulse-recording 1.5s infinite;
+}
+
+@keyframes pulse-recording {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { transform: scale(1.1); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 
 .input-actions-right {
@@ -3302,6 +3324,345 @@ html[data-accent-theme="violet"].mode-panel-header { background: rgba(168,85,247
 
 .login-signup-link a:hover {
   text-decoration: underline;
+}
+
+/* ==========================================================================
+   EMAIL OTP AUTHENTICATION UI STYLES
+   ========================================================================== */
+.auth-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 4px;
+  border-radius: 16px;
+  margin-bottom: 1.75rem;
+  gap: 4px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auth-tab-btn.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.35) 0%, rgba(99, 102, 241, 0.35) 100%);
+  border-color: rgba(139, 92, 246, 0.4);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+}
+
+.auth-view {
+  animation: auth-view-fade 0.35s ease-out forwards;
+}
+
+@keyframes auth-view-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 4-Digit Input Boxes Container */
+.otp-boxes-wrapper {
+  margin: 1.75rem 0 1.25rem 0;
+}
+
+.otp-inputs-grid {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.otp-digit-input {
+  width: 60px;
+  height: 68px;
+  text-align: center;
+  font-size: 1.85rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  background: rgba(15, 23, 42, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.otp-digit-input::placeholder {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.otp-digit-input:focus {
+  border-color: #ff6b00;
+  box-shadow: 0 0 25px rgba(255, 107, 0, 0.65), 0 0 0 3px rgba(255, 107, 0, 0.3);
+  transform: translateY(-2px) scale(1.04);
+  outline: none;
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.otp-digit-input.typing-scale {
+  transform: scale(1.08);
+}
+
+.otp-digit-input.filled {
+  border-color: rgba(255, 107, 0, 0.6);
+  background: rgba(255, 107, 0, 0.12);
+  color: #ff8c38;
+}
+
+.otp-digit-input.shake {
+  animation: otp-shake 0.4s ease;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.25) !important;
+}
+
+@keyframes otp-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+/* Green Checkmark Success Animation View */
+.otp-success-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  animation: auth-view-fade 0.4s ease-out forwards;
+}
+
+.checkmark-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 2px solid #10b981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.45);
+  animation: checkmark-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes checkmark-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  80% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.checkmark-icon {
+  width: 48px;
+  height: 48px;
+}
+
+.checkmark-circle-bg {
+  stroke: #10b981;
+  stroke-width: 2;
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: checkmark-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke: #10b981;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmark-draw 0.45s 0.25s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+@keyframes checkmark-stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkmark-draw {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.otp-success-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.5px;
+}
+
+.otp-success-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.otp-inbox-preview-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 107, 0, 0.12);
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  color: #ff8c38;
+  padding: 0.6rem 1.1rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.2);
+}
+
+.otp-inbox-preview-btn:hover {
+  background: rgba(255, 107, 0, 0.25);
+  border-color: #ff6b00;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.35);
+}
+
+/* OTP Meta Row (Timer & Resend Button) */
+.otp-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding: 0 4px;
+}
+
+.otp-timer-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  transition: all 0.3s;
+}
+
+.otp-timer-badge.expired {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.timer-dot {
+  color: #10b981;
+  font-size: 0.65rem;
+  animation: pulse-ring 1.5s infinite;
+}
+
+.otp-timer-badge.expired .timer-dot {
+  color: #ef4444;
+  animation: none;
+}
+
+.otp-resend-btn {
+  background: transparent;
+  border: none;
+  color: var(--accent-color);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+}
+
+.otp-resend-btn:hover:not(:disabled) {
+  color: #a855f7;
+  background: rgba(139, 92, 246, 0.1);
+  text-decoration: underline;
+}
+
+.otp-resend-btn:disabled {
+  color: rgba(255, 255, 255, 0.3);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.otp-change-email-link {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.otp-change-email-link:hover {
+  text-decoration: underline;
+}
+
+/* Status Messages */
+.otp-status-msg {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+  text-align: center;
+  line-height: 1.4;
+  animation: auth-view-fade 0.3s ease forwards;
+}
+
+.otp-status-msg.success {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.otp-status-msg.error {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.otp-status-msg.warning {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 /* Responsive */
