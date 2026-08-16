@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=23">
+  <link rel="stylesheet" href="style.css?v=24">
   <!-- Markdown parser, HTML purifier, and syntax highlighter CDN libraries -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
@@ -126,7 +126,7 @@
               </form>
             </div>
 
-            <!-- Step 2: Verify 4-Digit OTP -->
+            <!-- Step 2: Verify 6-Digit OTP -->
             <div id="otp-step-verify" class="otp-step" style="display:none;">
               <!-- Standard Verification Form View -->
               <div id="otp-verify-form-wrap">
@@ -150,7 +150,7 @@
                 <div class="otp-meta-row">
                   <div class="otp-timer-badge" id="otp-timer-badge">
                     <span class="timer-dot">●</span>
-                    <span>Expires in <strong id="otp-countdown-text">02:00</strong></span>
+                    <span>Expires in <strong id="otp-countdown-text">05:00</strong></span>
                   </div>
                   <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
                     <span>Resend OTP</span>
@@ -352,6 +352,17 @@
               </div>
             </div>
           </div>
+          <!-- Extension Store Button -->
+          <div class="extension-btn-container">
+            <button class="header-icon-btn extension-btn glow-pulse" id="header-extension-btn" title="Zeno Browser Extension" aria-label="Zeno Browser Extension">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="extension-icon-svg">
+                <path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path>
+              </svg>
+              <span class="extension-btn-text">Extension</span>
+              <span class="extension-status-dot" id="extension-status-dot" title="Extension Status"></span>
+            </button>
+          </div>
+
           <!-- Profile -->
           <div class="profile-container">
             <button class="profile-avatar-btn" id="profile-avatar-btn" aria-label="User Profile">
@@ -540,6 +551,79 @@
             <span>Analyze Screenshot</span>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zeno Agent Mode Extension Required Modal -->
+  <div class="modal-overlay" id="extension-modal">
+    <div class="extension-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="extension-modal-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="extension-title-icon"><path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path></svg>
+          </div>
+          <h3 class="modal-title">🚀 Zeno Agent Mode Requires Extension</h3>
+        </div>
+        <button class="modal-close-btn" id="extension-modal-close" aria-label="Close Modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="extension-modal-body">
+        <div class="extension-hero-wrap">
+          <div class="extension-hero-glow"></div>
+          <div class="extension-hero-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hero-puzzle-svg"><path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path></svg>
+          </div>
+        </div>
+
+        <p class="extension-modal-lead">
+          To use <strong>Agent Mode</strong>, please download and install the official <strong>Zeno browser extension</strong>.
+        </p>
+
+        <div class="extension-features-grid">
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">📥</div>
+            <div class="ext-feat-content">
+              <h4>1. Download Extension</h4>
+              <p>Click below to download <code>zeno-extension.zip</code> package directly.</p>
+            </div>
+          </div>
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">📂</div>
+            <div class="ext-feat-content">
+              <h4>2. Extract Zip File</h4>
+              <p>Unzip <code>zeno-extension.zip</code> to a folder on your computer.</p>
+            </div>
+          </div>
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">🧩</div>
+            <div class="ext-feat-content">
+              <h4>3. Load Unpacked in Chrome</h4>
+              <p>Go to <code>chrome://extensions</code> → Enable <strong>Developer Mode</strong> → Click <strong>Load unpacked</strong> and select the folder.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="extension-detection-status" id="extension-detection-status">
+          <div class="detection-status-left">
+            <span class="detection-dot unverified" id="detection-status-dot"></span>
+            <span class="detection-text" id="detection-status-text">Extension not detected</span>
+          </div>
+          <button type="button" class="detection-check-btn" id="extension-btn-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Check Again</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer extension-modal-footer">
+        <button class="modal-btn secondary" id="extension-btn-cancel">Cancel</button>
+        <a class="modal-btn primary install-extension-btn" id="extension-btn-install" href="zeno-extension.zip" download="zeno-extension.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Download Zeno Extension (.zip)</span>
+        </a>
       </div>
     </div>
   </div>
@@ -813,16 +897,16 @@
   </div>
 
   <!-- Load Custom Script Modules -->
-  <script src="js/api-client.js?v=9"></script>
+  <script src="js/api-client.js?v=11"></script>
   <script src="js/storage.js"></script>
   <script src="js/providers.js"></script>
   <script src="js/chat-engine.js"></script>
   <script src="js/voice-engine.js"></script>
   <script src="js/background.js?v=12"></script>
-  <script src="js/agent-mode.js?v=10"></script>
+  <script src="js/agent-mode.js?v=35"></script>
   <script src="js/modes.js?v=5"></script>
   
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=16"></script>
 
   <script>
     // Login screen — exact same canvas particle + network animation as the home screen

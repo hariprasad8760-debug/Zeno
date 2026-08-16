@@ -16,15 +16,26 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:5000/*"],
+      "matches": [
+        "http://localhost:5000/*",
+        "http://127.0.0.1:5000/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*"
+      ],
       "js": ["zeno-web-content.js"],
-      "run_at": "document_end"
+      "run_at": "document_start"
     },
     {
       "matches": ["<all_urls>"],
       "exclude_matches": [
         "http://localhost:5000/*",
-        "http://127.0.0.1:5000/*"
+        "http://127.0.0.1:5000/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1:3000/*",
+        "http://localhost:*/*",
+        "http://127.0.0.1:*/*"
       ],
       "js": [
         "lib/purify.min.js",

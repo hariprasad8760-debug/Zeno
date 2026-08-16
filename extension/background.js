@@ -37,12 +37,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'turnOffAgentMode') {
     // 1. Persist turnoff state in local storage
     chrome.storage.local.set({ agentMode: 'false' }, () => {
-      // 2. Notify all localhost client tabs to toggle off agent checkbox
+      // 2. Notify all localhost client tabs (ports 3000, 5000, etc.) to toggle off agent mode
       chrome.tabs.query({}, (tabs) => {
         tabs.forEach((tab) => {
-          if (tab.url && (tab.url.startsWith('http://localhost:5000') || tab.url.startsWith('http://127.0.0.1:5000'))) {
+          if (tab.url && (tab.url.startsWith('http://localhost') || tab.url.startsWith('http://127.0.0.1'))) {
             chrome.tabs.sendMessage(tab.id, { action: 'setAgentModeOff' }, () => {
-              // Ignore potential errors if tab is closing or not fully loaded
               if (chrome.runtime.lastError) { /* ignore */ }
             });
           }

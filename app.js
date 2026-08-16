@@ -438,7 +438,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (otpVerifyStatusMsg) otpVerifyStatusMsg.style.display = "none";
   }
 
-  // 3. Countdown Timer Engine (2:00 -> 00:00)
+  // 3. Countdown Timer Engine (05:00 -> 00:00)
   function startOtpCountdown(expiresAtTimestamp) {
     if (otpTimerInterval) clearInterval(otpTimerInterval);
     otpExpiresAt = expiresAtTimestamp;
@@ -501,15 +501,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (otpStepRequest) otpStepRequest.style.display = "none";
       if (otpStepVerify) otpStepVerify.style.display = "block";
 
-      // Start 2:00 countdown timer
-      startOtpCountdown(res.expiresAt || (Date.now() + 120000));
+      // Start 5:00 countdown timer (300,000 ms)
+      startOtpCountdown(res.expiresAt || (Date.now() + 300000));
 
       // Focus first digit box
       setTimeout(() => {
         if (otpDigitInputs[0]) otpDigitInputs[0].focus();
       }, 100);
 
-      // Handle Live Inbox Preview link (if using auto test inbox)
+      // Handle Live Test Inbox Preview link
       const previewWrap = document.getElementById("otp-inbox-preview-wrap");
       const previewBtn = document.getElementById("otp-inbox-preview-btn");
       if (res.previewUrl && previewWrap && previewBtn) {
@@ -519,8 +519,15 @@ document.addEventListener("DOMContentLoaded", () => {
         previewWrap.style.display = "none";
       }
 
-      showOtpStatus(`Verification code sent to ${emailVal}. Valid for 2 minutes.`, "success");
-      setTimeout(() => hideOtpStatus(), 5000);
+      // DEV MODE: auto-fill OTP digits if backend returned devOtp
+      if (res.devOtp && otpDigitInputs.length >= 4) {
+        const digits = String(res.devOtp).split('');
+        digits.forEach((d, i) => { if (otpDigitInputs[i]) otpDigitInputs[i].value = d; });
+        showOtpStatus(`✅ Dev mode — no email configured. Code auto-filled below. Check backend terminal too.`, "success");
+      } else {
+        showOtpStatus(`Verification code sent to ${emailVal}. Valid for 5 minutes.`, "success");
+        setTimeout(() => hideOtpStatus(), 5000);
+      }
 
     } catch (err) {
       if (otpRequestErrorMsg) {
@@ -559,9 +566,17 @@ document.addEventListener("DOMContentLoaded", () => {
       otpResendBtn.disabled = true;
       try {
         const res = await window.ZenoAPI.sendOTP(activeOtpEmail);
-        startOtpCountdown(res.expiresAt || (Date.now() + 120000));
+        startOtpCountdown(res.expiresAt || (Date.now() + 300000));
         otpDigitInputs.forEach(i => { if (i) { i.value = ""; i.classList.remove("filled", "typing-scale"); } });
         if (otpDigitInputs[0]) otpDigitInputs[0].focus();
+
+        const previewWrap = document.getElementById("otp-inbox-preview-wrap");
+        const previewBtn = document.getElementById("otp-inbox-preview-btn");
+        if (res.previewUrl && previewWrap && previewBtn) {
+          previewBtn.href = res.previewUrl;
+          previewWrap.style.display = "block";
+        }
+
         showOtpStatus(`New verification code sent to ${activeOtpEmail}`, "success");
       } catch (err) {
         showOtpStatus(err.message || "Failed to resend OTP", "error");

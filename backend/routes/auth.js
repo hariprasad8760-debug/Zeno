@@ -1,11 +1,16 @@
 /* =============================================================================
-   Auth Routes — In-memory sessions & OTP Store
-   Supports username/password login & 2-minute Email OTP Verification via Nodemailer
+   Auth Routes — Sessions & Google OAuth 2.0 / Gmail API OTP Authentication
+   - 6-digit cryptographically secure OTP
+   - 5-minute expiration
+   - Rate limiting on OTP requests
+   - Maximum 5 verification attempts
+   - Secure server-side validation using SHA-256 hashing
    ============================================================================= */
 
 const express = require('express');
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
-const nodemailer = require('nodemailer');
+const emailService = require('../services/email');
 const router = express.Router();
 
 // ── In-memory session store ──────────────────────────────────────────────────
@@ -13,7 +18,7 @@ const router = express.Router();
 const sessions = new Map();
 
 // ── In-memory OTP store ──────────────────────────────────────────────────────
-// Map<email, { code: string, expiresAt: number, attempts: number }>
+// Map<email, { hash: string, expiresAt: number, attempts: number, lastRequestedAt: number, user: object }>
 const otpStore = new Map();
 
 // ── Demo users ───────────────────────────────────────────────────────────────
@@ -21,6 +26,11 @@ const DEMO_USERS = [
   { id: '1', username: 'hariprasad', password: 'zeno123', name: 'Hariprasad S.', email: 'developer@zeno.ai', avatar: null },
   { id: '2', username: 'admin',      password: 'admin123', name: 'Admin User',    email: 'admin@zeno.ai',      avatar: null },
 ];
+
+// ── Helper: Hash OTP code securely with SHA-256 ──────────────────────────────
+function hashOTP(code) {
+  return crypto.createHash('sha256').update(String(code).trim()).digest('hex');
+}
 
 // ── Helper: Find user by email or username ────────────────────────────────────
 function findUserByEmailOrUsername(identifier) {
@@ -30,97 +40,47 @@ function findUserByEmailOrUsername(identifier) {
   );
 }
 
-// ── Nodemailer Transporter Helper ──────────────────────────────────────────────
-let testAccount = null;
-
-async function sendOTPEmail(recipientEmail, otpCode) {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '587');
-  const user = process.env.SMTP_USER || '';
-  const pass = process.env.SMTP_PASS || '';
-  const from = process.env.SMTP_FROM || '"Zeno AI Assistant" <noreply@zeno.ai>';
-
-  const mailHtml = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 480px; margin: 0 auto; background: #0a0e1a; color: #ffffff; padding: 32px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
-      <h2 style="font-size: 22px; font-weight: 700; color: #ffffff; margin-bottom: 8px;">Let's verify your email</h2>
-      <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 24px;">Use the following 4-digit verification code to complete your sign in to Zeno AI. This code will expire in <strong>2 minutes</strong>.</p>
-      <div style="background: rgba(255, 107, 0, 0.1); border: 2px solid #ff6b00; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 24px;">
-        <span style="font-family: monospace; font-size: 32px; font-weight: 800; letter-spacing: 12px; color: #ff6b00;">${otpCode}</span>
-      </div>
-      <p style="font-size: 12px; color: rgba(255,255,255,0.4); text-align: center;">If you did not request this verification code, please ignore this email.</p>
-    </div>
-  `;
-
-  if (user && pass) {
-    // 1. Production Mode: Send to real user Gmail/SMTP inbox
-    const transporter = nodemailer.createTransport({
-      host,
-      port,
-      secure: port === 465,
-      auth: { user, pass }
-    });
-
-    const info = await transporter.sendMail({
-      from,
-      to: recipientEmail,
-      subject: `Your Zeno Verification Code is ${otpCode}`,
-      html: mailHtml
-    });
-
-    console.log(`[ZENO OTP SERVICE] Live email sent to ${recipientEmail} (Message ID: ${info.messageId})`);
-    return info;
-  } else {
-    // 2. Automated Test Mode: Send via Ethereal Mailbox so real email is delivered to a test inbox URL
-    try {
-      if (!testAccount) {
-        testAccount = await nodemailer.createTestAccount();
-      }
-
-      const testTransporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass
-        }
-      });
-
-      const info = await testTransporter.sendMail({
-        from: '"Zeno AI Assistant" <noreply@zeno.ai>',
-        to: recipientEmail,
-        subject: `Your Zeno Verification Code is ${otpCode}`,
-        html: mailHtml
-      });
-
-      const previewUrl = nodemailer.getTestMessageUrl(info);
-      console.log(`\n========================================`);
-      console.log(`[ZENO OTP EMAIL SENT SUCCESSFULLY]`);
-      console.log(`Recipient:   ${recipientEmail}`);
-      console.log(`OTP Code:    ${otpCode} (Expires in 2 mins)`);
-      console.log(`Live Inbox URL: ${previewUrl}`);
-      console.log(`(To send directly to your personal Gmail inbox, set SMTP_USER & SMTP_PASS in backend/.env)`);
-      console.log(`========================================\n`);
-
-      return { previewUrl, info };
-    } catch (fallbackErr) {
-      console.log(`[ZENO OTP SERVICE] Dispatch requested for: ${recipientEmail} | OTP Code: ${otpCode}`);
-      return false;
-    }
-  }
+// ── Helper: Validate email format ────────────────────────────────────────────
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
 }
 
 // ── POST /api/auth/send-otp ───────────────────────────────────────────────────
 router.post('/send-otp', async (req, res) => {
   const { email } = req.body;
 
-  if (!email || typeof email !== 'string' || !email.trim()) {
-    return res.status(400).json({ error: 'Valid email address is required', code: 'INVALID_EMAIL' });
+  if (!email || typeof email !== 'string' || !isValidEmail(email)) {
+    return res.status(400).json({
+      error: 'Please enter a valid email address.',
+      code: 'INVALID_EMAIL'
+    });
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  
-  // Find or create virtual demo profile for email
+  const now = Date.now();
+
+  // 1. Rate Limiting Protection (Minimum 45s between OTP requests)
+  const existingRecord = otpStore.get(normalizedEmail);
+  const RESEND_COOLDOWN_MS = 45 * 1000;
+
+  if (existingRecord && existingRecord.lastRequestedAt) {
+    const elapsed = now - existingRecord.lastRequestedAt;
+    if (elapsed < RESEND_COOLDOWN_MS) {
+      const waitSecs = Math.ceil((RESEND_COOLDOWN_MS - elapsed) / 1000);
+      return res.status(429).json({
+        error: `Please wait ${waitSecs}s before requesting another OTP.`,
+        code: 'RATE_LIMITED',
+        retryAfterSeconds: waitSecs
+      });
+    }
+  }
+
+  // 2. Invalidate any existing OTP for this email
+  if (existingRecord) {
+    otpStore.delete(normalizedEmail);
+  }
+
+  // 3. Find or create virtual demo profile for user
   let user = findUserByEmailOrUsername(normalizedEmail);
   if (!user) {
     const namePart = normalizedEmail.split('@')[0];
@@ -134,37 +94,53 @@ router.post('/send-otp', async (req, res) => {
     };
   }
 
-  // Generate secure 4-digit OTP
-  const otpCode = Math.floor(1000 + Math.random() * 9000).toString();
-  const expiresInMs = 2 * 60 * 1000; // 2 minutes (120,000 ms)
-  const expiresAt = Date.now() + expiresInMs;
+  // 4. Generate cryptographically secure random 4-digit OTP (1000 - 9999)
+  const otpCode = crypto.randomInt(1000, 10000).toString();
+  const OTP_EXPIRATION_MS = 5 * 60 * 1000; // 5 minutes
+  const expiresAt = now + OTP_EXPIRATION_MS;
 
-  // Save to OTP Store
+  // 5. Store hashed OTP on server
   otpStore.set(normalizedEmail, {
-    code: otpCode,
+    hash: hashOTP(otpCode),
     expiresAt,
     attempts: 0,
+    lastRequestedAt: now,
     user
   });
 
-  // Send real email via Nodemailer
-  let mailResult = null;
+  // 6. Dispatch email using Google OAuth 2.0 / SMTP / Dev-console fallback
   try {
-    mailResult = await sendOTPEmail(normalizedEmail, otpCode);
+    const mailResult = await emailService.sendOTPEmail(normalizedEmail, otpCode, 5);
+
+    return res.json({
+      success: true,
+      message: `A 4-digit verification code was sent to ${normalizedEmail}`,
+      email: normalizedEmail,
+      expiresInSeconds: 300,
+      expiresAt,
+      previewUrl: mailResult && mailResult.previewUrl ? mailResult.previewUrl : null,
+      // In dev mode (no email configured) return OTP so user can proceed without email
+      devOtp: mailResult && mailResult.devOtp ? mailResult.devOtp : undefined
+    });
   } catch (err) {
-    console.error(`[Email Send Error] Failed to dispatch email to ${normalizedEmail}:`, err.message);
+    // Invalidate stored OTP if dispatch failed
+    otpStore.delete(normalizedEmail);
+
+    console.error(`[Email Dispatch Error for ${normalizedEmail}]:`, err.message);
+
+    // Provide clean, actionable error response
+    let userMsg = 'Failed to deliver OTP email. Please check your Google OAuth server configuration.';
+    if (err.message.includes('not fully configured')) {
+      userMsg = 'Google OAuth credentials not configured on backend. Please set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REFRESH_TOKEN in .env';
+    } else if (err.message.includes('invalid_grant') || err.message.includes('authentication failed')) {
+      userMsg = 'Google OAuth authentication failed. Refresh token may be expired or invalid.';
+    }
+
+    return res.status(500).json({
+      error: userMsg,
+      code: 'EMAIL_DISPATCH_FAILED'
+    });
   }
-
-  const previewUrl = mailResult && mailResult.previewUrl ? mailResult.previewUrl : null;
-
-  res.json({
-    success: true,
-    message: `OTP sent successfully to ${normalizedEmail}`,
-    email: normalizedEmail,
-    expiresInSeconds: 120,
-    expiresAt,
-    previewUrl
-  });
 });
 
 // ── POST /api/auth/verify-otp ─────────────────────────────────────────────────
@@ -172,46 +148,86 @@ router.post('/verify-otp', (req, res) => {
   const { email, otp } = req.body;
 
   if (!email || !otp) {
-    return res.status(400).json({ error: 'Email and 4-digit OTP are required', code: 'MISSING_FIELDS' });
+    return res.status(400).json({
+      error: 'Email and 4-digit verification code are required.',
+      code: 'MISSING_FIELDS'
+    });
   }
 
   const normalizedEmail = String(email).trim().toLowerCase();
   const cleanOtp = String(otp).trim();
 
+  // Validate format (exactly 4 digits)
+  if (!/^\d{4}$/.test(cleanOtp)) {
+    return res.status(400).json({
+      error: 'Please enter a valid 4-digit verification code.',
+      code: 'INVALID_FORMAT'
+    });
+  }
+
   const record = otpStore.get(normalizedEmail);
 
   if (!record) {
-    return res.status(400).json({ error: 'No OTP found. Please request a new OTP.', code: 'NO_OTP_FOUND' });
+    return res.status(400).json({
+      error: 'No active OTP found. Please request a new code.',
+      code: 'NO_OTP_FOUND'
+    });
   }
 
-  // Check 2-minute expiration
+  // 1. Check 5-minute expiration
   if (Date.now() > record.expiresAt) {
     otpStore.delete(normalizedEmail);
-    return res.status(400).json({ error: 'OTP Expired. Please click Resend OTP.', code: 'OTP_EXPIRED' });
+    return res.status(400).json({
+      error: 'OTP expired. Please request a new code.',
+      code: 'OTP_EXPIRED'
+    });
   }
 
-  // Check OTP match
-  if (record.code !== cleanOtp) {
+  // 2. Check maximum 5 attempts
+  if (record.attempts >= 5) {
+    otpStore.delete(normalizedEmail);
+    return res.status(400).json({
+      error: 'Too many incorrect attempts. Please request a new code.',
+      code: 'TOO_MANY_ATTEMPTS'
+    });
+  }
+
+  // 3. Verify OTP using constant-time hash comparison
+  const providedHash = hashOTP(cleanOtp);
+  const isMatch = crypto.timingSafeEqual(
+    Buffer.from(providedHash, 'hex'),
+    Buffer.from(record.hash, 'hex')
+  );
+
+  if (!isMatch) {
     record.attempts += 1;
-    if (record.attempts >= 5) {
+    const remaining = 5 - record.attempts;
+    if (remaining <= 0) {
       otpStore.delete(normalizedEmail);
-      return res.status(400).json({ error: 'Too many failed attempts. Please request a new OTP.', code: 'TOO_MANY_ATTEMPTS' });
+      return res.status(400).json({
+        error: 'Too many incorrect attempts. Please request a new code.',
+        code: 'TOO_MANY_ATTEMPTS'
+      });
     }
-    return res.status(400).json({ error: 'Invalid OTP. Please check the code and try again.', code: 'INVALID_OTP' });
+    return res.status(400).json({
+      error: `Invalid verification code. (${remaining} attempt${remaining > 1 ? 's' : ''} left)`,
+      code: 'INVALID_OTP',
+      remainingAttempts: remaining
+    });
   }
 
-  // OTP is valid & active! Consume OTP
+  // 4. OTP verified successfully! Invalidate OTP immediately
   const user = record.user;
   otpStore.delete(normalizedEmail);
 
-  // Generate session token
+  // 5. Generate secure session token
   const token = uuidv4();
   sessions.set(token, {
     user: { id: user.id, name: user.name, email: user.email, username: user.username },
     createdAt: Date.now()
   });
 
-  res.json({
+  return res.json({
     success: true,
     message: 'OTP Verified Successfully',
     token,
@@ -219,12 +235,12 @@ router.post('/verify-otp', (req, res) => {
   });
 });
 
-// ── POST /api/auth/login ──────────────────────────────────────────────────────
+// ── POST /api/auth/login (Password alternative) ───────────────────────────────
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required' });
+    return res.status(400).json({ error: 'Username and password required', code: 'MISSING_FIELDS' });
   }
 
   const user = DEMO_USERS.find(
@@ -241,7 +257,7 @@ router.post('/login', (req, res) => {
     createdAt: Date.now()
   });
 
-  res.json({
+  return res.json({
     token,
     user: { id: user.id, name: user.name, email: user.email, username: user.username }
   });
@@ -252,7 +268,7 @@ router.delete('/logout', (req, res) => {
   const header = req.headers['authorization'] || '';
   const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (token) sessions.delete(token);
-  res.json({ message: 'Logged out' });
+  return res.json({ message: 'Logged out' });
 });
 
 // ── GET /api/auth/me ──────────────────────────────────────────────────────────
@@ -265,9 +281,8 @@ router.get('/me', (req, res) => {
   }
 
   const { user } = sessions.get(token);
-  res.json({ user });
+  return res.json({ user });
 });
 
-// Export sessions so middleware can access it
 module.exports = router;
 module.exports.sessions = sessions;

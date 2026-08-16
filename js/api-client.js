@@ -3,7 +3,9 @@
    Supports automatic API key quota fallback rotation.
    ============================================================================= */
 
-const API_BASE = `${window.location.origin}/api`;
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:5000/api'
+  : `${window.location.origin}/api`;
 
 const BASE_PROMPT = `You are Zeno, an expert AI coding assistant. You are precise, helpful, and concise.
 Format your responses using clean markdown. Use code blocks with language identifiers for all code snippets.
@@ -262,27 +264,18 @@ window.ZenoAPI = {
       const res = await fetch(`${API_BASE}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email: String(email).trim() })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error('Server returned an empty or invalid response.'); }
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to send OTP');
+        throw new Error(data.error || 'Failed to send OTP verification code');
       }
       return data;
     } catch (err) {
       if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        // Fallback for offline/mock mode
-        const mockCode = Math.floor(1000 + Math.random() * 9000).toString();
-        const expiresAt = Date.now() + 120000;
-        localStorage.setItem(`mock_otp_${email.toLowerCase()}`, JSON.stringify({ code: mockCode, expiresAt }));
-        console.log(`[Offline Fallback OTP for ${email}]: ${mockCode}`);
-        return {
-          success: true,
-          message: `OTP sent successfully to ${email}`,
-          expiresInSeconds: 120,
-          expiresAt,
-          demoOtp: mockCode
-        };
+        throw new Error('Cannot connect to backend server. Please ensure the server is running on port 5000.');
       }
       throw err;
     }
@@ -293,9 +286,11 @@ window.ZenoAPI = {
       const res = await fetch(`${API_BASE}/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, otp })
+        body: JSON.stringify({ email: String(email).trim(), otp: String(otp).trim() })
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error('Server returned an empty or invalid response.'); }
       if (!res.ok) {
         throw new Error(data.error || 'Verification failed');
       }
@@ -303,28 +298,7 @@ window.ZenoAPI = {
       return data;
     } catch (err) {
       if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        // Offline fallback verify logic
-        const raw = localStorage.getItem(`mock_otp_${email.toLowerCase()}`);
-        if (!raw) throw new Error('No OTP found. Please request a new OTP.');
-        const rec = JSON.parse(raw);
-        if (Date.now() > rec.expiresAt) {
-          localStorage.removeItem(`mock_otp_${email.toLowerCase()}`);
-          throw new Error('OTP Expired. Please click Resend OTP.');
-        }
-        if (rec.code !== String(otp).trim()) {
-          throw new Error('Invalid OTP. Please check the code and try again.');
-        }
-        localStorage.removeItem(`mock_otp_${email.toLowerCase()}`);
-        const token = 'offline_mock_otp_token';
-        this.setToken(token);
-        const namePart = email.split('@')[0];
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        return {
-          success: true,
-          message: 'OTP Verified Successfully',
-          token,
-          user: { id: 'offline_user', name: formattedName, email, username: namePart }
-        };
+        throw new Error('Cannot connect to backend server. Please ensure the server is running on port 5000.');
       }
       throw err;
     }

@@ -4968,6 +4968,335 @@ body.cascade-5 .floating-agent-container {
   }
 }
 
+/* =============================================================================
+   ZENO BROWSER EXTENSION INTEGRATION & AGENT MODE MODAL STYLES
+   ============================================================================= */
+
+/* Header Extension Button */
+.extension-btn-container {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon-btn.extension-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: visible;
+  user-select: none;
+}
+
+.header-icon-btn.extension-btn:hover {
+  color: #ffffff;
+  border-color: rgba(255, 107, 0, 0.5);
+  background: rgba(255, 107, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.extension-icon-svg {
+  width: 17px;
+  height: 17px;
+  stroke: var(--accent-color, #ff6b00);
+  transition: transform 0.25s ease;
+}
+
+.header-icon-btn.extension-btn:hover .extension-icon-svg {
+  transform: rotate(15deg) scale(1.1);
+}
+
+.extension-btn-text {
+  letter-spacing: 0.2px;
+}
+
+.extension-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.extension-status-dot.installed {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+
+/* Subtle Animated Glow / Pulse Effect (when extension is NOT installed) */
+.header-icon-btn.extension-btn.glow-pulse {
+  border-color: rgba(255, 107, 0, 0.75);
+  box-shadow: 0 0 16px rgba(255, 107, 0, 0.35), inset 0 0 8px rgba(255, 107, 0, 0.15);
+  animation: extension-glow-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes extension-glow-pulse {
+  0% {
+    box-shadow: 0 0 8px rgba(255, 107, 0, 0.25), 0 0 0 0 rgba(255, 107, 0, 0.35), inset 0 0 4px rgba(255, 107, 0, 0.1);
+    border-color: rgba(255, 107, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.55), 0 0 0 4px rgba(255, 107, 0, 0.15), inset 0 0 10px rgba(255, 107, 0, 0.25);
+    border-color: rgba(255, 107, 0, 0.95);
+  }
+  100% {
+    box-shadow: 0 0 8px rgba(255, 107, 0, 0.25), 0 0 0 0 rgba(255, 107, 0, 0.35), inset 0 0 4px rgba(255, 107, 0, 0.1);
+    border-color: rgba(255, 107, 0, 0.5);
+  }
+}
+
+/* Extension Required Modal */
+.extension-modal-card {
+  width: 520px;
+  max-width: 92vw;
+  background: var(--bg-panel, #0b0f19);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 107, 0, 0.15);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: modal-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 10001;
+}
+
+@keyframes modal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.extension-modal-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255, 107, 0, 0.12);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extension-title-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #ff6b00;
+}
+
+.extension-modal-body {
+  padding: 1.75rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.extension-hero-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0 0.25rem 0;
+}
+
+.extension-hero-icon-box {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+  border: 1.5px solid rgba(255, 107, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px rgba(255, 107, 0, 0.25);
+  position: relative;
+  z-index: 2;
+}
+
+.hero-puzzle-svg {
+  width: 34px;
+  height: 34px;
+  stroke: #ff6b00;
+  filter: drop-shadow(0 2px 8px rgba(255, 107, 0, 0.5));
+}
+
+.extension-hero-glow {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.35) 0%, rgba(99, 102, 241, 0) 70%);
+  filter: blur(14px);
+  z-index: 1;
+}
+
+.extension-modal-lead {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+  text-align: center;
+  margin: 0;
+}
+
+.extension-modal-lead strong {
+  color: #ff6b00;
+}
+
+.extension-features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}
+
+.ext-feat-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.ext-feat-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  padding-top: 2px;
+}
+
+.ext-feat-content h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.15rem 0;
+}
+
+.ext-feat-content p {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.extension-detection-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+}
+
+.detection-status-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.detection-dot.unverified {
+  background: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.detection-dot.verified {
+  background: #10b981;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
+}
+
+.detection-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.detection-check-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.detection-check-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.install-extension-btn {
+  background: linear-gradient(135deg, #ff6b00 0%, #ff8533 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px rgba(255, 107, 0, 0.4) !important;
+  transition: all 0.25s ease !important;
+}
+
+.install-extension-btn:hover {
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.6) !important;
+  transform: translateY(-1px);
+}
+
+.extension-modal-footer {
+  padding: 1.25rem 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+@media (max-width: 600px) {
+  .extension-modal-card {
+    width: 95vw;
+  }
+  .extension-modal-body {
+    padding: 1.25rem;
+  }
+  .extension-modal-footer {
+    padding: 1rem 1.25rem;
+    flex-wrap: wrap;
+  }
+  .extension-modal-footer button {
+    flex: 1;
+    min-width: 120px;
+  }
+  .header-icon-btn.extension-btn .extension-btn-text {
+    display: none;
+  }
+}
+
 
 
 
