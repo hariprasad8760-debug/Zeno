@@ -1429,42 +1429,82 @@ html[data-accent-theme="violet"] .action-card:hover .card-icon { background: rgb
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Typing Indicator Styling */
-.typing-indicator {
+/* Zeno Light Travelling Shimmer Component */
+.typing-indicator.zeno-shimmer-pill {
   display: none;
   align-items: center;
-  gap: 0.75rem;
-  max-width: 130px;
-  padding: 0.65rem 0.85rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
+  gap: 2px;
+  padding: 0.4rem 0.95rem;
+  background: var(--bg-card, rgba(15, 23, 42, 0.65));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: 20px;
   align-self: flex-start;
-  margin-top: 0.5rem;
-  animation: fade-in var(--transition-speed) ease;
+  margin: 0.5rem 0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: zeno-pill-fade 0.25s ease-out forwards;
+  user-select: none;
+  width: fit-content;
+  max-width: none;
 }
 
-.indicator-logo-svg {
-  width: 22px;
-  height: 22px;
-  mix-blend-mode: screen;
-  /* no float animation */
+@keyframes zeno-pill-fade {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.typing-dots {
-  display: flex;
-  gap: 4px;
-  align-items: center;
+.searching-shimmer-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.3px;
+  /* Light travelling sweep effect: White text with active theme color shimmer beam */
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    #ffffff 35%,
+    var(--accent-color, #ff6b00) 50%,
+    #ffffff 65%,
+    rgba(255, 255, 255, 0.45) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: light-travelling 1.8s linear infinite;
 }
-.typing-dots .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--text-secondary);
-  animation: typing-bounce 1.4s infinite ease-in-out;
+
+.searching-shimmer-dots {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-color, #ff6b00);
+  min-width: 16px;
+  display: inline-block;
 }
-.typing-dots .dot:nth-child(1) { animation-delay: -0.32s; }
-.typing-dots .dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes light-travelling {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searching-shimmer-text {
+    animation: none;
+    -webkit-text-fill-color: #ffffff;
+  }
+}
 
 /* --- Input Bar / Footer Area (Prompt search bar remains unchanged) --- */
 .workspace-footer {

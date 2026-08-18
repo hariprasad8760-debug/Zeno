@@ -1059,10 +1059,18 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function callBackendAI(chatObj, textPrompt, imageBase64Data = null, modeType = "chat") {
-    // Show typing thinking animation
-    typingIndicator.classList.add("thinking-pulsate");
-    typingIndicator.style.display = "flex";
-    window.ZenoChatEngine.scrollToBottom(chatContainer);
+    // Append loading pill directly below user message in messages list
+    if (typingIndicator && messagesList) {
+      messagesList.appendChild(typingIndicator);
+      typingIndicator.style.display = "flex";
+      if (window.ZenoPuzzleLoader) {
+        window.ZenoPuzzleLoader.start(
+          document.getElementById("puzzle-loader-canvas"),
+          document.getElementById("puzzle-dots-el")
+        );
+      }
+      window.ZenoChatEngine.scrollToBottom(chatContainer);
+    }
 
     try {
       const activeProvider = window.ZenoProviders.getActiveProvider();
@@ -1077,9 +1085,9 @@ document.addEventListener("DOMContentLoaded", () => {
         imageBase64: imageBase64Data
       });
 
-      // Hide typing animation
-      typingIndicator.style.display = "none";
-      typingIndicator.classList.remove("thinking-pulsate");
+      // Stop puzzle loader animation and hide pill
+      if (window.ZenoPuzzleLoader) window.ZenoPuzzleLoader.stop();
+      if (typingIndicator) typingIndicator.style.display = "none";
 
       // Save AI Response to database list
       const aiMsg = {
@@ -1097,8 +1105,8 @@ document.addEventListener("DOMContentLoaded", () => {
       window.ZenoChatEngine.scrollToBottom(chatContainer);
 
     } catch (err) {
-      typingIndicator.style.display = "none";
-      typingIndicator.classList.remove("thinking-pulsate");
+      if (window.ZenoPuzzleLoader) window.ZenoPuzzleLoader.stop();
+      if (typingIndicator) typingIndicator.style.display = "none";
       pushSystemNotification(`AI Error: ${err.message}`);
     }
   }

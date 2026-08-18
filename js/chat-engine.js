@@ -128,3 +128,31 @@ window.ZenoChatEngine = {
     });
   }
 };
+
+/* =============================================================================
+   Zeno Light Travelling Shimmer Loader
+   ============================================================================= */
+
+window.ZenoPuzzleLoader = {
+  textTimer: null,
+
+  start(canvasEl, textDotsEl) {
+    this.stop();
+    if (textDotsEl) {
+      let step = 0;
+      const dotsArr = ['.', '..', '...', ''];
+      textDotsEl.textContent = '...';
+      this.textTimer = setInterval(() => {
+        step = (step + 1) % dotsArr.length;
+        textDotsEl.textContent = dotsArr[step];
+      }, 350);
+    }
+  },
+
+  stop() {
+    if (this.textTimer) {
+      clearInterval(this.textTimer);
+      this.textTimer = null;
+    }
+  }
+};

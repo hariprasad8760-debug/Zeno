@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=70">
   <!-- Markdown parser, HTML purifier, and syntax highlighter CDN libraries -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
@@ -468,16 +468,9 @@
 
         <!-- Message List -->
         <div class="messages-list" id="messages-list">
-          <!-- Typing Indicator -->
-          <div class="typing-indicator" id="typing-indicator">
-            <div class="indicator-logo">
-              <img src="assets/brain_logo.png" class="indicator-logo-svg zeno-logo-img" alt="Zeno">
-            </div>
-            <div class="typing-dots">
-              <span class="dot"></span>
-              <span class="dot"></span>
-              <span class="dot"></span>
-            </div>
+          <!-- Zeno Light Travelling Shimmer Component -->
+          <div class="typing-indicator zeno-shimmer-pill" id="typing-indicator" style="display: none;">
+            <span class="searching-shimmer-text">Zeno.searching</span><span class="searching-shimmer-dots" id="puzzle-dots-el">...</span>
           </div>
         </div>
       </section>
@@ -900,13 +893,13 @@
   <script src="js/api-client.js?v=11"></script>
   <script src="js/storage.js"></script>
   <script src="js/providers.js"></script>
-  <script src="js/chat-engine.js"></script>
+  <script src="js/chat-engine.js?v=10"></script>
   <script src="js/voice-engine.js"></script>
   <script src="js/background.js?v=12"></script>
   <script src="js/agent-mode.js?v=35"></script>
   <script src="js/modes.js?v=5"></script>
   
-  <script src="app.js?v=16"></script>
+  <script src="app.js?v=20"></script>
 
   <script>
     // Login screen — exact same canvas particle + network animation as the home screen
