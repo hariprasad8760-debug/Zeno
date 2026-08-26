@@ -5,7 +5,7 @@
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000/api'
-  : `${window.location.origin}/api`;
+  : 'https://zeno-z94s.onrender.com/api';
 
 const BASE_PROMPT = `You are Zeno, an expert AI coding assistant. You are precise, helpful, and concise.
 Format your responses using clean markdown. Use code blocks with language identifiers for all code snippets.
