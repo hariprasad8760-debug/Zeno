@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=70">
+  <link rel="stylesheet" href="style.css?v=90">
   <!-- Markdown parser, HTML purifier, and syntax highlighter CDN libraries -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
@@ -54,34 +54,46 @@
         <p class="login-tagline">Sign in to continue to Zeno AI Assistant</p>
       </div>
 
-      <!-- Right Side - Sign In Form -->
+      <!-- Right Side - Sign In / Sign Up Card -->
       <div class="login-right">
         <div class="login-form-card">
-          <!-- Auth Mode Tabs -->
-          <div class="auth-tabs" id="auth-tabs">
-            <button type="button" class="auth-tab-btn active" id="tab-btn-password" data-target="password-login-view">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              <span>Password</span>
+          <!-- Main Auth Switcher Bars (Sign In / Email OTP / Sign Up) -->
+          <div class="auth-main-bars" id="auth-main-bars">
+            <button type="button" class="auth-main-bar-btn active" id="main-tab-btn-signin" data-view="main-view-signin">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              <span>Sign In</span>
             </button>
-            <button type="button" class="auth-tab-btn" id="tab-btn-otp" data-target="otp-login-view">
+            <button type="button" class="auth-main-bar-btn" id="main-tab-btn-otp" data-view="main-view-otp">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               <span>Email OTP</span>
             </button>
+            <button type="button" class="auth-main-bar-btn" id="main-tab-btn-signup" data-view="main-view-signup">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+              <span>Sign Up</span>
+            </button>
           </div>
 
-          <!-- Password Login View -->
-          <div class="auth-view active" id="password-login-view">
+          <!-- 1. SIGN IN (PASSWORD) VIEW -->
+          <div class="main-auth-view active" id="main-view-signin">
             <h2 class="login-form-title">Sign in to Zeno</h2>
-            <p class="login-form-subtitle">Enter your credentials to access your account</p>
+            <p class="login-form-subtitle">Enter your credentials to access your workspace</p>
             
             <form class="login-form" id="login-form">
               <div class="login-input-group">
-                <label for="login-email">Username</label>
-                <input type="text" id="login-email" placeholder="e.g. hariprasad" required>
+                <label for="login-email">Username or Gmail</label>
+                <div class="input-with-icon">
+                  <input type="text" id="login-email" placeholder="e.g. hariprasad or name@gmail.com" required autocomplete="username">
+                </div>
               </div>
               <div class="login-input-group">
                 <label for="login-password">Password</label>
-                <input type="password" id="login-password" placeholder="••••••••" required>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                  <button type="button" class="toggle-password-visibility" data-input="login-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
               </div>
               
               <div class="login-options">
@@ -89,29 +101,35 @@
                   <input type="checkbox" id="remember-me">
                   <span>Remember me</span>
                 </label>
-                <a href="#" class="forgot-password">Forgot password?</a>
+                <a href="#" class="forgot-password" id="login-switch-to-otp">Sign in with OTP</a>
               </div>
               
               <div class="login-error-msg" id="login-error-msg" style="display:none;">Invalid credentials</div>
-              <button type="submit" class="login-submit-btn">Sign In</button>
+              <button type="submit" class="login-submit-btn" id="login-submit-btn">
+                <span class="btn-text">Sign In</span>
+                <span class="btn-spinner" style="display:none;">
+                  <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                  Signing in...
+                </span>
+              </button>
               
               <div class="login-signup-link">
-                Don't have an account? <a href="#">Sign up</a>
+                Don't have an account? <a href="#" id="link-goto-signup">Sign up now</a>
               </div>
             </form>
           </div>
 
-          <!-- Email OTP Login View -->
-          <div class="auth-view" id="otp-login-view" style="display:none;">
+          <!-- 2. EMAIL OTP VIEW -->
+          <div class="main-auth-view" id="main-view-otp" style="display:none;">
             <!-- Step 1: Request OTP -->
             <div id="otp-step-request" class="otp-step">
               <h2 class="login-form-title">Email OTP Sign In</h2>
-              <p class="login-form-subtitle">Enter your registered email to receive a secure 4-digit code valid for 2 minutes.</p>
+              <p class="login-form-subtitle">Enter your registered email to receive a secure 4-digit code.</p>
               
               <form class="login-form" id="otp-request-form">
                 <div class="login-input-group">
-                  <label for="otp-email-input">Registered Email Address</label>
-                  <input type="email" id="otp-email-input" placeholder="e.g. developer@zeno.ai" required autocomplete="email">
+                  <label for="otp-email-input">Gmail / Email Address</label>
+                  <input type="email" id="otp-email-input" placeholder="e.g. developer@gmail.com" required autocomplete="email">
                 </div>
                 
                 <div class="login-error-msg" id="otp-request-error-msg" style="display:none;"></div>
@@ -123,17 +141,21 @@
                     Sending...
                   </span>
                 </button>
+
+                <div class="login-signup-link" style="margin-top:1.25rem;">
+                  Don't have an account? <a href="#" id="link-otp-goto-signup">Create one here</a>
+                </div>
               </form>
             </div>
 
-            <!-- Step 2: Verify 6-Digit OTP -->
+            <!-- Step 2: Verify 4-Digit OTP -->
             <div id="otp-step-verify" class="otp-step" style="display:none;">
               <!-- Standard Verification Form View -->
               <div id="otp-verify-form-wrap">
                 <h2 class="login-form-title">Let's verify your email</h2>
                 <p class="login-form-subtitle">
                   We've sent a 4-digit code to <strong id="otp-target-email-display" style="color:#ff6b00;">developer@zeno.ai</strong>. 
-                  It'll auto-verify once entered. <a href="#" id="otp-change-email-btn" class="otp-change-email-link">(Change)</a>
+                  <a href="#" id="otp-change-email-btn" class="otp-change-email-link">(Change)</a>
                 </p>
 
                 <!-- 4-Digit Inputs Container -->
@@ -189,8 +211,80 @@
                 <h3 class="otp-success-title">Verified Successfully</h3>
                 <p class="otp-success-subtitle">Redirecting to your Zeno workspace...</p>
               </div>
-              </div>
             </div>
+          </div>
+
+          <!-- 3. SIGN UP / USER CREATING VIEW -->
+          <div class="main-auth-view" id="main-view-signup" style="display:none;">
+            <h2 class="login-form-title">Create Account</h2>
+            <p class="login-form-subtitle">Fill in your information to join Zeno AI</p>
+
+            <form class="login-form signup-form" id="signup-form">
+              <!-- Full Name -->
+              <div class="login-input-group">
+                <label for="signup-name">Full Name <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="text" id="signup-name" placeholder="e.g. Hariprasad S." required autocomplete="name">
+                </div>
+              </div>
+
+              <!-- Gmail / Email -->
+              <div class="login-input-group">
+                <label for="signup-email">Gmail / Email Address <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="email" id="signup-email" placeholder="e.g. username@gmail.com" required autocomplete="email">
+                </div>
+              </div>
+
+              <!-- Username -->
+              <div class="login-input-group">
+                <label for="signup-username">Username <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="text" id="signup-username" placeholder="e.g. hariprasad" required autocomplete="username">
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="login-input-group">
+                <label for="signup-password">Password <span class="required-star">*</span></label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6">
+                  <button type="button" class="toggle-password-visibility" data-input="signup-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="login-input-group">
+                <label for="signup-confirm-password">Confirm Password <span class="required-star">*</span></label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="signup-confirm-password" placeholder="Re-enter your password" required autocomplete="new-password" minlength="6">
+                  <button type="button" class="toggle-password-visibility" data-input="signup-confirm-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+                <div class="password-match-hint" id="signup-password-match-hint" style="display:none;"></div>
+              </div>
+
+              <!-- Error Box -->
+              <div class="login-error-msg" id="signup-error-msg" style="display:none;"></div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn" id="signup-submit-btn">
+                <span class="btn-text">Create Account</span>
+                <span class="btn-spinner" style="display:none;">
+                  <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                  Creating account...
+                </span>
+              </button>
+
+              <div class="login-signup-link">
+                Already have an account? <a href="#" id="link-goto-signin">Sign in here</a>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -890,7 +984,7 @@
   </div>
 
   <!-- Load Custom Script Modules -->
-  <script src="js/api-client.js?v=11"></script>
+  <script src="js/api-client.js?v=20"></script>
   <script src="js/storage.js"></script>
   <script src="js/providers.js"></script>
   <script src="js/chat-engine.js?v=10"></script>
@@ -899,7 +993,7 @@
   <script src="js/agent-mode.js?v=35"></script>
   <script src="js/modes.js?v=5"></script>
   
-  <script src="app.js?v=20"></script>
+  <script src="app.js?v=40"></script>
 
   <script>
     // Login screen — exact same canvas particle + network animation as the home screen

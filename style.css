@@ -3367,6 +3367,126 @@ html[data-accent-theme="violet"].mode-panel-header { background: rgba(168,85,247
 }
 
 /* ==========================================================================
+   SIGN IN / SIGN UP MAIN SWITCHER BARS & AUTH VIEWS
+   ========================================================================== */
+.auth-main-bars {
+  display: flex;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 5px;
+  border-radius: 18px;
+  margin-bottom: 1.5rem;
+  gap: 6px;
+  backdrop-filter: blur(10px);
+}
+
+.auth-main-bar-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(255, 255, 255, 0.65);
+  padding: 0.65rem 0.75rem;
+  border-radius: 13px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-main-bar-btn svg {
+  transition: transform 0.25s ease;
+}
+
+.auth-main-bar-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-main-bar-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.auth-main-bar-btn.active {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.35) 0%, rgba(139, 92, 246, 0.35) 100%);
+  border-color: rgba(255, 107, 0, 0.4);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(255, 107, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+.main-auth-view {
+  animation: auth-view-fade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Password Input with Show/Hide Eye Toggle */
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-input-wrap input {
+  padding-right: 2.85rem !important;
+}
+
+.toggle-password-visibility {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.toggle-password-visibility:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.required-star {
+  color: #ff6b00;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.password-match-hint {
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.password-match-hint.match-success {
+  color: #10b981;
+}
+
+.password-match-hint.match-error {
+  color: #ef4444;
+}
+
+.signup-form {
+  gap: 1rem;
+}
+
+/* ==========================================================================
    EMAIL OTP AUTHENTICATION UI STYLES
    ========================================================================== */
 .auth-tabs {
@@ -3375,7 +3495,7 @@ html[data-accent-theme="violet"].mode-panel-header { background: rgba(168,85,247
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 4px;
   border-radius: 16px;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.5rem;
   gap: 4px;
 }
 

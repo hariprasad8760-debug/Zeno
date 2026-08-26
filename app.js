@@ -340,20 +340,235 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 400); // end transition fade-to-black
   }
 
+  // ===========================================================================
+  // SIGN IN / SIGN UP MAIN SWITCHER & PASSWORD VISIBILITY CONTROLLER
+  // ===========================================================================
+  const mainAuthBarBtns = document.querySelectorAll(".auth-main-bar-btn");
+  const mainAuthViews = document.querySelectorAll(".main-auth-view");
+  const loginWelcomeTitle = document.querySelector(".login-welcome");
+  const loginTagline = document.querySelector(".login-tagline");
+
+  function switchToAuthView(viewId) {
+    mainAuthBarBtns.forEach(btn => {
+      if (btn.dataset.view === viewId) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+
+    mainAuthViews.forEach(view => {
+      if (view.id === viewId) {
+        view.classList.add("active");
+        view.style.display = "block";
+      } else {
+        view.classList.remove("active");
+        view.style.display = "none";
+      }
+    });
+
+    // Update left hero text contextually
+    if (viewId === "main-view-signup") {
+      if (loginWelcomeTitle) loginWelcomeTitle.textContent = "Join Zeno AI";
+      if (loginTagline) loginTagline.textContent = "Create your account to experience next-gen AI";
+    } else if (viewId === "main-view-otp") {
+      if (loginWelcomeTitle) loginWelcomeTitle.textContent = "Email Verification";
+      if (loginTagline) loginTagline.textContent = "Sign in securely via 4-digit Gmail OTP";
+    } else {
+      if (loginWelcomeTitle) loginWelcomeTitle.textContent = "Welcome back!";
+      if (loginTagline) loginTagline.textContent = "Sign in to continue to Zeno AI Assistant";
+    }
+  }
+
+  mainAuthBarBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      switchToAuthView(btn.dataset.view);
+    });
+  });
+
+  // Footer Cross-Links
+  const linkGotoSignup = document.getElementById("link-goto-signup");
+  const linkOtpGotoSignup = document.getElementById("link-otp-goto-signup");
+  const linkGotoSignin = document.getElementById("link-goto-signin");
+  const loginSwitchToOtp = document.getElementById("login-switch-to-otp");
+
+  if (linkGotoSignup) {
+    linkGotoSignup.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchToAuthView("main-view-signup");
+    });
+  }
+
+  if (linkOtpGotoSignup) {
+    linkOtpGotoSignup.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchToAuthView("main-view-signup");
+    });
+  }
+
+  if (linkGotoSignin) {
+    linkGotoSignin.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchToAuthView("main-view-signin");
+    });
+  }
+
+  if (loginSwitchToOtp) {
+    loginSwitchToOtp.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchToAuthView("main-view-otp");
+    });
+  }
+
+  // Password Visibility Eye Toggle Handler
+  document.querySelectorAll(".toggle-password-visibility").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetInputId = btn.dataset.input;
+      const targetInput = document.getElementById(targetInputId);
+      if (!targetInput) return;
+
+      const eyeOpen = btn.querySelector(".eye-open");
+      const eyeClosed = btn.querySelector(".eye-closed");
+
+      if (targetInput.type === "password") {
+        targetInput.type = "text";
+        if (eyeOpen) eyeOpen.style.display = "none";
+        if (eyeClosed) eyeClosed.style.display = "inline";
+      } else {
+        targetInput.type = "password";
+        if (eyeOpen) eyeOpen.style.display = "inline";
+        if (eyeClosed) eyeClosed.style.display = "none";
+      }
+    });
+  });
+
   // Login form submit
+  const loginSubmitBtn = document.getElementById("login-submit-btn");
   if (loginForm) {
     loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      loginErrorMsg.style.display = "none";
+      if (loginErrorMsg) loginErrorMsg.style.display = "none";
       const u = loginEmail.value.trim();
       const p = loginPassword.value;
+
+      setBtnLoading(loginSubmitBtn, true);
 
       try {
         const user = await window.ZenoAPI.login(u, p);
         onAuthSuccess(user);
       } catch (err) {
-        loginErrorMsg.textContent = err.message || "Login failed";
-        loginErrorMsg.style.display = "block";
+        if (loginErrorMsg) {
+          loginErrorMsg.textContent = err.message || "Login failed";
+          loginErrorMsg.style.display = "block";
+        }
+      } finally {
+        setBtnLoading(loginSubmitBtn, false);
+      }
+    });
+  }
+
+  // ===========================================================================
+  // SIGN UP / USER CREATION CONTROLLER
+  // ===========================================================================
+  const signupForm = document.getElementById("signup-form");
+  const signupName = document.getElementById("signup-name");
+  const signupEmail = document.getElementById("signup-email");
+  const signupUsername = document.getElementById("signup-username");
+  const signupPassword = document.getElementById("signup-password");
+  const signupConfirmPassword = document.getElementById("signup-confirm-password");
+  const signupMatchHint = document.getElementById("signup-password-match-hint");
+  const signupErrorMsg = document.getElementById("signup-error-msg");
+  const signupSubmitBtn = document.getElementById("signup-submit-btn");
+
+  // Real-time password match validator
+  function checkPasswordMatch() {
+    if (!signupMatchHint || !signupPassword || !signupConfirmPassword) return;
+    const p1 = signupPassword.value;
+    const p2 = signupConfirmPassword.value;
+
+    if (!p2) {
+      signupMatchHint.style.display = "none";
+      return;
+    }
+
+    signupMatchHint.style.display = "flex";
+    if (p1 === p2) {
+      signupMatchHint.className = "password-match-hint match-success";
+      signupMatchHint.textContent = "✅ Passwords match";
+    } else {
+      signupMatchHint.className = "password-match-hint match-error";
+      signupMatchHint.textContent = "❌ Passwords do not match";
+    }
+  }
+
+  if (signupPassword && signupConfirmPassword) {
+    signupPassword.addEventListener("input", checkPasswordMatch);
+    signupConfirmPassword.addEventListener("input", checkPasswordMatch);
+  }
+
+  // Auto-fill username suggestion from email
+  if (signupEmail && signupUsername) {
+    signupEmail.addEventListener("blur", () => {
+      if (!signupUsername.value.trim() && signupEmail.value.includes("@")) {
+        signupUsername.value = signupEmail.value.split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+      }
+    });
+  }
+
+  if (signupForm) {
+    signupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (signupErrorMsg) signupErrorMsg.style.display = "none";
+
+      const name = signupName.value.trim();
+      const email = signupEmail.value.trim();
+      const username = signupUsername.value.trim();
+      const password = signupPassword.value;
+      const confirmPassword = signupConfirmPassword.value;
+
+      if (!name || !email || !password) {
+        if (signupErrorMsg) {
+          signupErrorMsg.textContent = "Please fill in all required fields.";
+          signupErrorMsg.style.display = "block";
+        }
+        return;
+      }
+
+      if (password.length < 6) {
+        if (signupErrorMsg) {
+          signupErrorMsg.textContent = "Password must be at least 6 characters long.";
+          signupErrorMsg.style.display = "block";
+        }
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        if (signupErrorMsg) {
+          signupErrorMsg.textContent = "Passwords do not match. Please verify.";
+          signupErrorMsg.style.display = "block";
+        }
+        return;
+      }
+
+      setBtnLoading(signupSubmitBtn, true);
+
+      try {
+        const user = await window.ZenoAPI.register({
+          name,
+          email,
+          username,
+          password,
+          confirmPassword
+        });
+
+        onAuthSuccess(user);
+      } catch (err) {
+        if (signupErrorMsg) {
+          signupErrorMsg.textContent = err.message || "Failed to create account. Please try again.";
+          signupErrorMsg.style.display = "block";
+        }
+      } finally {
+        setBtnLoading(signupSubmitBtn, false);
       }
     });
   }
@@ -365,27 +580,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let otpExpiresAt = 0;
   let activeOtpEmail = "";
 
-  // 1. Auth Mode Tab Switching (Password vs Email OTP)
-  const authTabBtns = document.querySelectorAll(".auth-tab-btn");
-  const authViews = document.querySelectorAll(".auth-view");
 
-  authTabBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      authTabBtns.forEach(b => b.classList.remove("active"));
-      authViews.forEach(v => {
-        v.classList.remove("active");
-        v.style.display = "none";
-      });
-
-      btn.classList.add("active");
-      const targetId = btn.dataset.target;
-      const targetView = document.getElementById(targetId);
-      if (targetView) {
-        targetView.classList.add("active");
-        targetView.style.display = "block";
-      }
-    });
-  });
 
   // 2. OTP UI Component References
   const otpRequestForm = document.getElementById("otp-request-form");

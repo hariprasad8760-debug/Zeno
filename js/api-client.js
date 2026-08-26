@@ -230,17 +230,68 @@ window.ZenoAPI = {
     };
   },
 
+  async register({ name, email, username, password, confirmPassword }) {
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, username, password, confirmPassword })
+      });
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (e) { throw new Error('Invalid server response.'); }
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to create account');
+      }
+      if (data.token) this.setToken(data.token);
+      return data.user;
+    } catch (err) {
+      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
+        // Offline / client fallback mode
+        const localUsers = JSON.parse(localStorage.getItem('zeno_local_users') || '[]');
+        const cleanEmail = String(email).trim().toLowerCase();
+        const cleanUsername = String(username || cleanEmail.split('@')[0]).trim().toLowerCase();
+        
+        if (localUsers.some(u => u.email === cleanEmail || u.username === cleanUsername)) {
+          throw new Error('An account with this email or username already exists.');
+        }
+
+        const newUser = {
+          id: `local_${Date.now()}`,
+          name: String(name).trim(),
+          email: cleanEmail,
+          username: cleanUsername,
+          password: String(password)
+        };
+        localUsers.push(newUser);
+        localStorage.setItem('zeno_local_users', JSON.stringify(localUsers));
+        this.setToken(`local_token_${newUser.id}`);
+        return { id: newUser.id, name: newUser.name, email: newUser.email, username: newUser.username };
+      }
+      throw err;
+    }
+  },
+
   async login(username, password) {
+    const cleanIdentifier = String(username).trim().toLowerCase();
     const MOCK_USERS = [
       { username: 'harxh',      password: 'zeno123',  name: 'Hariprasad S.', email: 'developer@zeno.ai' },
       { username: 'hariprasad', password: 'zeno123',  name: 'Hariprasad S.', email: 'developer@zeno.ai' },
       { username: 'admin',      password: 'admin123', name: 'Admin User',     email: 'admin@zeno.ai'     },
     ];
-    const match = MOCK_USERS.find(
-      u => u.username.toLowerCase() === username.toLowerCase() && u.password === password
+    // Check built-in mock users
+    let match = MOCK_USERS.find(
+      u => (u.username.toLowerCase() === cleanIdentifier || u.email.toLowerCase() === cleanIdentifier) && u.password === password
     );
+    // Check locally registered offline users
+    if (!match) {
+      const localUsers = JSON.parse(localStorage.getItem('zeno_local_users') || '[]');
+      match = localUsers.find(
+        u => (u.username.toLowerCase() === cleanIdentifier || u.email.toLowerCase() === cleanIdentifier) && u.password === password
+      );
+    }
     if (match) {
-      this.setToken('offline_mock_token_harixh');
+      this.setToken(`mock_token_${match.username}`);
       return { name: match.name, email: match.email, username: match.username };
     }
     try {

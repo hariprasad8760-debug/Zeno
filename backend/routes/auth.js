@@ -235,20 +235,107 @@ router.post('/verify-otp', (req, res) => {
   });
 });
 
+// ── POST /api/auth/register (User Creation / Sign Up) ───────────────────────────
+router.post('/register', (req, res) => {
+  const { name, email, username, password, confirmPassword } = req.body;
+
+  if (!name || !email || !password) {
+    return res.status(400).json({
+      error: 'Full name, email, and password are required.',
+      code: 'MISSING_FIELDS'
+    });
+  }
+
+  const cleanName = String(name).trim();
+  const cleanEmail = String(email).trim().toLowerCase();
+  const cleanUsername = String(username || cleanEmail.split('@')[0]).trim().toLowerCase();
+  const cleanPassword = String(password);
+
+  if (!isValidEmail(cleanEmail)) {
+    return res.status(400).json({
+      error: 'Please enter a valid email address.',
+      code: 'INVALID_EMAIL'
+    });
+  }
+
+  if (cleanPassword.length < 6) {
+    return res.status(400).json({
+      error: 'Password must be at least 6 characters long.',
+      code: 'WEAK_PASSWORD'
+    });
+  }
+
+  if (confirmPassword !== undefined && cleanPassword !== String(confirmPassword)) {
+    return res.status(400).json({
+      error: 'Passwords do not match. Please verify.',
+      code: 'PASSWORD_MISMATCH'
+    });
+  }
+
+  // Check if username or email is already registered
+  const existingUser = DEMO_USERS.find(
+    u => u.email.toLowerCase() === cleanEmail || u.username.toLowerCase() === cleanUsername
+  );
+
+  if (existingUser) {
+    const isEmailTaken = existingUser.email.toLowerCase() === cleanEmail;
+    return res.status(409).json({
+      error: isEmailTaken 
+        ? 'An account with this email already exists. Please sign in.' 
+        : 'This username is already taken. Please choose another.',
+      code: isEmailTaken ? 'EMAIL_TAKEN' : 'USERNAME_TAKEN'
+    });
+  }
+
+  // Create new user profile
+  const newUser = {
+    id: `user_${Date.now()}`,
+    username: cleanUsername,
+    password: cleanPassword,
+    name: cleanName,
+    email: cleanEmail,
+    avatar: null,
+    createdAt: Date.now()
+  };
+
+  DEMO_USERS.push(newUser);
+
+  // Generate session token
+  const token = uuidv4();
+  sessions.set(token, {
+    user: { id: newUser.id, name: newUser.name, email: newUser.email, username: newUser.username },
+    createdAt: Date.now()
+  });
+
+  return res.status(201).json({
+    success: true,
+    message: 'Account created successfully',
+    token,
+    user: { id: newUser.id, name: newUser.name, email: newUser.email, username: newUser.username }
+  });
+});
+
+// Alias for /register
+router.post('/signup', (req, res, next) => {
+  req.url = '/register';
+  router.handle(req, res, next);
+});
+
 // ── POST /api/auth/login (Password alternative) ───────────────────────────────
 router.post('/login', (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password required', code: 'MISSING_FIELDS' });
+    return res.status(400).json({ error: 'Username/Email and password required', code: 'MISSING_FIELDS' });
   }
 
+  const cleanIdentifier = String(username).trim().toLowerCase();
   const user = DEMO_USERS.find(
-    u => (u.username.toLowerCase() === username.toLowerCase() || u.email.toLowerCase() === username.toLowerCase()) && u.password === password
+    u => (u.username.toLowerCase() === cleanIdentifier || u.email.toLowerCase() === cleanIdentifier) && u.password === password
   );
 
   if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials', code: 'INVALID_CREDENTIALS' });
+    return res.status(401).json({ error: 'Invalid username or password', code: 'INVALID_CREDENTIALS' });
   }
 
   const token = uuidv4();
