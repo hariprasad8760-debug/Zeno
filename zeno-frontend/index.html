@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent-theme="blue">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Zeno - A premium AI coding assistant designed with a futuristic minimal style.">
+  <title>Zeno AI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=90">
+  <!-- Markdown parser, HTML purifier, and syntax highlighter CDN libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body class="startup-active">
+
+  <!-- Cinematic Startup Overlay -->
+  <div id="startup-intro-overlay" class="startup-intro-overlay" style="display: flex; opacity: 1;">
+    <div class="startup-content">
+      <div class="startup-logo-wrapper">
+        <img src="assets/brain_logo.png" class="startup-logo" alt="Zeno Logo">
+        <div class="startup-logo-glow"></div>
+      </div>
+      <div class="startup-text-wrapper">
+        <h1 class="startup-title">Hello! I'm ZENO.</h1>
+        <p class="startup-subtitle">Your intelligent coding assistant.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Page Overlay (JWT authentication view) -->
+  <div class="login-overlay active" id="login-overlay">
+    <!-- Animated Particles Background -->
+    <div class="login-particles" id="login-particles"></div>
+    
+    <div class="login-container">
+      <!-- Left Side - Welcome -->
+      <div class="login-left">
+        <!-- Background Glow (Breathing animation from home) -->
+        <div class="login-bg-glow"></div>
+        
+        <!-- Dot Grid Background -->
+        <div class="login-dot-grid"></div>
+        
+        <div class="login-logo-circle">
+          <!-- Glowing Orb (Pulse ring from home) -->
+          <div class="login-glowing-orb"></div>
+          <img src="assets/brain_logo.png" class="login-hero-logo zeno-logo-img" alt="Zeno Logo">
+        </div>
+        <h1 class="login-welcome">Welcome back!</h1>
+        <p class="login-tagline">Sign in to continue to Zeno AI Assistant</p>
+      </div>
+
+      <!-- Right Side - Sign In / Sign Up Card -->
+      <div class="login-right">
+        <div class="login-form-card">
+          <!-- Main Auth Switcher Bars (Sign In / Email OTP / Sign Up) -->
+          <div class="auth-main-bars" id="auth-main-bars">
+            <button type="button" class="auth-main-bar-btn active" id="main-tab-btn-signin" data-view="main-view-signin">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+              <span>Sign In</span>
+            </button>
+            <button type="button" class="auth-main-bar-btn" id="main-tab-btn-otp" data-view="main-view-otp">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              <span>Email OTP</span>
+            </button>
+            <button type="button" class="auth-main-bar-btn" id="main-tab-btn-signup" data-view="main-view-signup">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+              <span>Sign Up</span>
+            </button>
+          </div>
+
+          <!-- 1. SIGN IN (PASSWORD) VIEW -->
+          <div class="main-auth-view active" id="main-view-signin">
+            <h2 class="login-form-title">Sign in to Zeno</h2>
+            <p class="login-form-subtitle">Enter your credentials to access your workspace</p>
+            
+            <form class="login-form" id="login-form">
+              <div class="login-input-group">
+                <label for="login-email">Username or Gmail</label>
+                <div class="input-with-icon">
+                  <input type="text" id="login-email" placeholder="e.g. hariprasad or name@gmail.com" required autocomplete="username">
+                </div>
+              </div>
+              <div class="login-input-group">
+                <label for="login-password">Password</label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                  <button type="button" class="toggle-password-visibility" data-input="login-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="login-options">
+                <label class="remember-checkbox">
+                  <input type="checkbox" id="remember-me">
+                  <span>Remember me</span>
+                </label>
+                <a href="#" class="forgot-password" id="login-switch-to-otp">Sign in with OTP</a>
+              </div>
+              
+              <div class="login-error-msg" id="login-error-msg" style="display:none;">Invalid credentials</div>
+              <button type="submit" class="login-submit-btn" id="login-submit-btn">
+                <span class="btn-text">Sign In</span>
+                <span class="btn-spinner" style="display:none;">
+                  <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                  Signing in...
+                </span>
+              </button>
+              
+              <div class="login-signup-link">
+                Don't have an account? <a href="#" id="link-goto-signup">Sign up now</a>
+              </div>
+            </form>
+          </div>
+
+          <!-- 2. EMAIL OTP VIEW -->
+          <div class="main-auth-view" id="main-view-otp" style="display:none;">
+            <!-- Step 1: Request OTP -->
+            <div id="otp-step-request" class="otp-step">
+              <h2 class="login-form-title">Email OTP Sign In</h2>
+              <p class="login-form-subtitle">Enter your registered email to receive a secure 4-digit code.</p>
+              
+              <form class="login-form" id="otp-request-form">
+                <div class="login-input-group">
+                  <label for="otp-email-input">Gmail / Email Address</label>
+                  <input type="email" id="otp-email-input" placeholder="e.g. developer@gmail.com" required autocomplete="email">
+                </div>
+                
+                <div class="login-error-msg" id="otp-request-error-msg" style="display:none;"></div>
+                
+                <button type="submit" class="login-submit-btn" id="otp-send-btn">
+                  <span class="btn-text">Send Verification Code</span>
+                  <span class="btn-spinner" style="display:none;">
+                    <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                    Sending...
+                  </span>
+                </button>
+
+                <div class="login-signup-link" style="margin-top:1.25rem;">
+                  Don't have an account? <a href="#" id="link-otp-goto-signup">Create one here</a>
+                </div>
+              </form>
+            </div>
+
+            <!-- Step 2: Verify 4-Digit OTP -->
+            <div id="otp-step-verify" class="otp-step" style="display:none;">
+              <!-- Standard Verification Form View -->
+              <div id="otp-verify-form-wrap">
+                <h2 class="login-form-title">Let's verify your email</h2>
+                <p class="login-form-subtitle">
+                  We've sent a 4-digit code to <strong id="otp-target-email-display" style="color:#ff6b00;">developer@zeno.ai</strong>. 
+                  <a href="#" id="otp-change-email-btn" class="otp-change-email-link">(Change)</a>
+                </p>
+
+                <!-- 4-Digit Inputs Container -->
+                <div class="otp-boxes-wrapper">
+                  <div class="otp-inputs-grid">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-1" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-2" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-3" autocomplete="off">
+                    <input type="text" maxlength="1" pattern="[0-9]*" inputmode="numeric" class="otp-digit-input" id="otp-digit-4" autocomplete="off">
+                  </div>
+                </div>
+
+                <!-- Live Timer & Resend Option -->
+                <div class="otp-meta-row">
+                  <div class="otp-timer-badge" id="otp-timer-badge">
+                    <span class="timer-dot">●</span>
+                    <span>Expires in <strong id="otp-countdown-text">05:00</strong></span>
+                  </div>
+                  <button type="button" class="otp-resend-btn" id="otp-resend-btn" disabled>
+                    <span>Resend OTP</span>
+                  </button>
+                </div>
+
+                <!-- Live Test Inbox Preview Link -->
+                <div id="otp-inbox-preview-wrap" style="display:none; margin-bottom: 1rem; text-align: center;">
+                  <a href="#" id="otp-inbox-preview-btn" target="_blank" class="otp-inbox-preview-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span>📬 Open Delivered Email in Live Inbox</span>
+                  </a>
+                </div>
+
+                <!-- Status Banner -->
+                <div class="otp-status-msg" id="otp-verify-status-msg" style="display:none;"></div>
+
+                <!-- Verify Button -->
+                <button type="button" class="login-submit-btn" id="otp-verify-btn">
+                  <span class="btn-text">Verify &amp; Sign In</span>
+                  <span class="btn-spinner" style="display:none;">
+                    <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                    Verifying...
+                  </span>
+                </button>
+              </div>
+
+              <!-- Animated Green Checkmark Success View -->
+              <div id="otp-success-screen" class="otp-success-screen" style="display:none;">
+                <div class="checkmark-circle">
+                  <svg class="checkmark-icon" viewBox="0 0 52 52">
+                    <circle class="checkmark-circle-bg" cx="26" cy="26" r="23" fill="none"/>
+                    <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                  </svg>
+                </div>
+                <h3 class="otp-success-title">Verified Successfully</h3>
+                <p class="otp-success-subtitle">Redirecting to your Zeno workspace...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. SIGN UP / USER CREATING VIEW -->
+          <div class="main-auth-view" id="main-view-signup" style="display:none;">
+            <h2 class="login-form-title">Create Account</h2>
+            <p class="login-form-subtitle">Fill in your information to join Zeno AI</p>
+
+            <form class="login-form signup-form" id="signup-form">
+              <!-- Full Name -->
+              <div class="login-input-group">
+                <label for="signup-name">Full Name <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="text" id="signup-name" placeholder="e.g. Hariprasad S." required autocomplete="name">
+                </div>
+              </div>
+
+              <!-- Gmail / Email -->
+              <div class="login-input-group">
+                <label for="signup-email">Gmail / Email Address <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="email" id="signup-email" placeholder="e.g. username@gmail.com" required autocomplete="email">
+                </div>
+              </div>
+
+              <!-- Username -->
+              <div class="login-input-group">
+                <label for="signup-username">Username <span class="required-star">*</span></label>
+                <div class="input-with-icon">
+                  <input type="text" id="signup-username" placeholder="e.g. hariprasad" required autocomplete="username">
+                </div>
+              </div>
+
+              <!-- Password -->
+              <div class="login-input-group">
+                <label for="signup-password">Password <span class="required-star">*</span></label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="signup-password" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6">
+                  <button type="button" class="toggle-password-visibility" data-input="signup-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Confirm Password -->
+              <div class="login-input-group">
+                <label for="signup-confirm-password">Confirm Password <span class="required-star">*</span></label>
+                <div class="input-with-icon password-input-wrap">
+                  <input type="password" id="signup-confirm-password" placeholder="Re-enter your password" required autocomplete="new-password" minlength="6">
+                  <button type="button" class="toggle-password-visibility" data-input="signup-confirm-password" title="Show/Hide password" tabindex="-1">
+                    <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                  </button>
+                </div>
+                <div class="password-match-hint" id="signup-password-match-hint" style="display:none;"></div>
+              </div>
+
+              <!-- Error Box -->
+              <div class="login-error-msg" id="signup-error-msg" style="display:none;"></div>
+
+              <!-- Submit Button -->
+              <button type="submit" class="login-submit-btn" id="signup-submit-btn">
+                <span class="btn-text">Create Account</span>
+                <span class="btn-spinner" style="display:none;">
+                  <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;border-color:#fff transparent #fff #fff;"></span>
+                  Creating account...
+                </span>
+              </button>
+
+              <div class="login-signup-link">
+                Already have an account? <a href="#" id="link-goto-signin">Sign in here</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Success Text Animation -->
+  <div id="login-success-animation" class="login-success-animation" style="display:none;">
+    <span id="login-success-text"></span>
+  </div>
+
+  <!-- Screenshot Overlay -->
+  <div class="screenshot-overlay" id="screenshot-overlay">
+    <div class="screenshot-instructions" id="screenshot-instructions">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      <span>Select the area you want to capture.</span>
+    </div>
+    <div class="screenshot-canvas-area" id="screenshot-canvas-area"></div>
+    <div class="screenshot-status-banner" id="screenshot-status-banner">
+      <span class="spinner-icon active" style="width:14px;height:14px;border-width:2px;"></span>
+      <span id="screenshot-status-text">Analyzing with Zeno...</span>
+    </div>
+  </div>
+
+  <!-- Clipboard Toast -->
+  <div class="clipboard-loader-toast" id="clipboard-loader-toast">
+    <span class="spinner-icon active" style="width:16px;height:16px;border-width:2px;"></span>
+    <span>Reading copied text...</span>
+  </div>
+
+  <!-- Mode Notification Banner — Professional slim top bar -->
+  <div class="mode-banner" id="mode-banner">
+    <div class="mode-banner-content">
+      <span class="mode-banner-text" id="mode-banner-text"></span>
+    </div>
+    <button class="mode-banner-exit" id="mode-banner-close" title="Exit mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      <span style="font-size:0.8rem;font-weight:600;">Exit</span>
+    </button>
+  </div>
+
+  <div class="app-container">
+    <!-- Left Sidebar -->
+    <aside class="sidebar-left">
+      <div class="sidebar-header">
+        <div class="zeno-logo">
+          <!-- Circuit Brain PNG Logo -->
+          <img src="assets/brain_logo.png" class="logo-svg zeno-logo-img" alt="Zeno Logo">
+          <span class="logo-text">Zeno</span>
+        </div>
+        <button class="new-chat-btn" id="new-chat-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Chat</span>
+        </button>
+      </div>
+
+      <div class="sidebar-scrollable">
+        <!-- Pinned Chats Section -->
+        <div class="sidebar-section">
+          <div class="section-title">Pinned Chats</div>
+          <ul class="chat-history-list" id="pinned-chats-list">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <!-- Recent Chats Section -->
+        <div class="sidebar-section">
+          <div class="section-title">Recent Chats</div>
+          <ul class="chat-history-list" id="recent-chats-list">
+            <!-- Dynamically populated (max 25) -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Agent Mode Panel -->
+      <div class="agent-mode-panel">
+        <div class="agent-mode-header">
+          <div class="agent-mode-title">
+            <span class="agent-indicator-pulse"></span>
+            <span>AI Agent Mode</span>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" id="agent-mode-toggle">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="agent-mode-desc" id="agent-mode-desc">Manual mode</div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="footer-action-btn" id="settings-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <span>Settings</span>
+        </button>
+        <button class="footer-action-btn logout-btn" id="logout-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="chat-workspace">
+      <div class="theme-ambient-glow" id="theme-ambient-glow"></div>
+
+      <!-- Top Header -->
+      <header class="workspace-header">
+        <div class="header-left">
+          <button class="sidebar-toggle-mobile" id="sidebar-toggle-mobile" aria-label="Toggle Sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          </button>
+          <div class="assistant-info">
+            <h1 class="assistant-title">Zeno AI Assistant</h1>
+            <div class="status-indicator">
+              <span class="status-dot"></span>
+              <span class="status-text">Online</span>
+            </div>
+          </div>
+          <!-- Mode Toggle Buttons -->
+          <div class="header-mode-btns">
+            <button class="header-mode-btn" id="header-btn-explain" data-mode="explain" title="Explain Error Mode">
+              <span class="hmode-icon">🔍</span>
+              <span class="hmode-label">Explain Error</span>
+            </button>
+            <button class="header-mode-btn" id="header-btn-optimize" data-mode="optimize" title="Optimize Code Mode">
+              <span class="hmode-icon">⚡</span>
+              <span class="hmode-label">Optimize</span>
+            </button>
+            <button class="header-mode-btn" id="header-btn-debug" data-mode="debug" title="Debug Mode">
+              <span class="hmode-icon">🐛</span>
+              <span class="hmode-label">Debug</span>
+            </button>
+          </div>
+        </div>
+        <div class="header-right">
+          <!-- Circuit Brain PNG Logo + Version Popup -->
+          <div class="header-brand" id="header-brand-btn" title="Click to see Zeno version">
+            <img src="assets/brain_logo.png" class="header-brain-logo zeno-logo-img" alt="Zeno Logo">
+            <span class="header-brand-name">ZENO</span>
+          </div>
+          <!-- Version Popup Card -->
+          <div class="zeno-version-popup" id="zeno-version-popup">
+            <div class="version-popup-inner">
+              <div class="version-popup-logo-wrap">
+                <img src="assets/brain_logo.png" class="version-popup-logo zeno-logo-img" alt="Zeno">
+                <div class="version-popup-glow"></div>
+              </div>
+              <div class="version-popup-info">
+                <div class="version-popup-name">ZENO</div>
+                <div class="version-popup-tagline">Code. Analyze. Solve.</div>
+                <div class="version-popup-badge">v 3.5.1</div>
+              </div>
+              <div class="version-popup-meta">
+                <div class="version-meta-row"><span class="meta-key">Build</span><span class="meta-val">2026.07.03</span></div>
+                <div class="version-meta-row"><span class="meta-key">Engine</span><span class="meta-val">Zeno Neural Core</span></div>
+                <div class="version-meta-row"><span class="meta-key">Mode</span><span class="meta-val accent">Pro &amp; Agent Enabled</span></div>
+                <div class="version-meta-row"><span class="meta-key">Status</span><span class="meta-val online-dot">● Online</span></div>
+              </div>
+            </div>
+          </div>
+          <!-- Extension Store Button -->
+          <div class="extension-btn-container">
+            <button class="header-icon-btn extension-btn glow-pulse" id="header-extension-btn" title="Zeno Browser Extension" aria-label="Zeno Browser Extension">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="extension-icon-svg">
+                <path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path>
+              </svg>
+              <span class="extension-btn-text">Extension</span>
+              <span class="extension-status-dot" id="extension-status-dot" title="Extension Status"></span>
+            </button>
+          </div>
+
+          <!-- Profile -->
+          <div class="profile-container">
+            <button class="profile-avatar-btn" id="profile-avatar-btn" aria-label="User Profile">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100" alt="User Profile" class="profile-avatar-img">
+            </button>
+            <div class="profile-dropdown" id="profile-dropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-name">Hariprasad S.</div>
+                <div class="dropdown-email">developer@zeno.ai</div>
+              </div>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item">My Profile</a>
+              <a href="#" class="dropdown-item">Billing &amp; API Keys</a>
+              <a href="#" class="dropdown-item" id="dropdown-settings-trigger">Preferences</a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item logout">Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Chat Output Container -->
+      <section class="chat-container" id="chat-container">
+        <div class="empty-state" id="empty-state">
+
+          <!-- State 1: Normal Welcome View -->
+          <div class="welcome-normal-view" id="welcome-normal-view">
+            <div class="welcome-bg-glow" id="welcome-bg-glow"></div>
+
+            <div class="zeno-welcome-logo">
+              <div class="glowing-orb"></div>
+              <!-- Circuit Brain PNG Welcome Logo -->
+              <img src="assets/brain_logo.png" class="welcome-logo-svg zeno-logo-img" alt="Zeno">
+                <defs>
+                  <linearGradient id="wbrainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#6366f1"/>
+                    <stop offset="50%" stop-color="#8b5cf6"/>
+                    <stop offset="100%" stop-color="#06b6d4"/>
+                  </linearGradient>
+                  <radialGradient id="wbrainGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+                  </radialGradient>
+                  <filter id="wglow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                </defs>
+                <!-- Outer glow ring -->
+            </div>
+
+            <h2 class="welcome-heading">Hello! I'm ZENO.</h2>
+            <p class="welcome-subheading">Your intelligent coding assistant.</p>
+
+            <!-- Quick Action Cards -->
+            <div class="quick-actions-grid">
+              <div class="action-card" id="card-explain" data-action="explain">
+                <div class="card-icon error-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">Explain Error</h3>
+                  <p class="card-desc">Analyze error line-by-line and trace the root cause with detailed explanations.</p>
+                </div>
+                <div class="card-active-badge">Active</div>
+              </div>
+              <div class="action-card" id="card-optimize" data-action="optimize">
+                <div class="card-icon optimize-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">Optimize Code</h3>
+                  <p class="card-desc">Simplify and refactor your code for better performance and readability.</p>
+                </div>
+                <div class="card-active-badge">Active</div>
+              </div>
+              <div class="action-card" id="card-debug" data-action="debug">
+                <div class="card-icon debug-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+                </div>
+                <div class="card-content">
+                  <h3 class="card-title">Debug Mode</h3>
+                  <p class="card-desc">Identify and fix logical bugs, correct code and optimize for production.</p>
+                </div>
+                <div class="card-active-badge">Active</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- State 2: AI Agent Activation Animation -->
+          <div class="agent-activated-view" id="agent-activated-view">
+            <div class="energy-ring-container">
+              <div class="energy-particle-emitter" id="particle-emitter"></div>
+              <div class="outer-rotating-ring"></div>
+              <div class="inner-pulsing-ring"></div>
+              <div class="light-beam-shimmer"></div>
+              <!-- Circuit Brain PNG in activation ring -->
+              <img src="assets/brain_logo.png" class="activated-logo-svg zeno-logo-img" alt="Zeno">
+            </div>
+            <h3 class="activated-heading">AI Agent Activated</h3>
+            <p class="activated-subheading">Ready to analyze your code.</p>
+          </div>
+
+        </div>
+
+        <!-- Message List -->
+        <div class="messages-list" id="messages-list">
+          <!-- Zeno Light Travelling Shimmer Component -->
+          <div class="typing-indicator zeno-shimmer-pill" id="typing-indicator" style="display: none;">
+            <span class="searching-shimmer-text">Zeno.searching</span><span class="searching-shimmer-dots" id="puzzle-dots-el">...</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Mode Panel (shown when a card is clicked, sits above footer) -->
+      <div class="mode-panel" id="mode-panel">
+        <div class="mode-panel-header">
+          <div class="mode-panel-title" id="mode-panel-title">
+            <span class="mode-panel-icon" id="mode-panel-icon">⚡</span>
+            <span id="mode-panel-name">Explain Error Mode</span>
+            <span class="mode-active-dot"></span>
+          </div>
+          <button class="mode-panel-close" id="mode-panel-close">✕ Exit Mode</button>
+        </div>
+        <div class="mode-panel-body" id="mode-panel-body">
+          <div class="mode-step-list" id="mode-step-list"></div>
+        </div>
+      </div>
+
+      <!-- Input Footer -->
+      <footer class="workspace-footer">
+        <div class="input-container">
+          <button class="input-action-btn" id="attach-btn" title="Attach file">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+          </button>
+          <button class="input-action-btn" id="mic-btn" title="Voice Input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+          </button>
+          <input type="file" id="file-input" style="display:none;" multiple>
+          <span class="file-attachment-badge" id="file-attachment-badge"></span>
+          <textarea class="prompt-textarea" id="prompt-input" rows="1" placeholder="Ask Zeno anything or paste your code..."></textarea>
+          <div class="input-actions-right">
+            <span class="shortcut-hint">Enter to send</span>
+            <button class="send-btn" id="send-btn" title="Send message" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </div>
+        <div class="footer-credits">Powered by Zeno AI • Secure sandbox workspace</div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Floating AI Agent Widget (Bottom-Right) - Smaller with wave -->
+  <div class="floating-agent-container" id="floating-agent-container">
+    <div class="float-wave-ring float-wave-ring-1"></div>
+    <div class="float-wave-ring float-wave-ring-2"></div>
+    <div class="float-wave-ring float-wave-ring-3"></div>
+    <button class="floating-agent-btn" id="floating-agent-btn" title="AI Agent Actions">
+      <img src="assets/brain_logo.png" class="agent-logo-svg zeno-logo-img" alt="Zeno">
+    </button>
+    <!-- Agent Popup -->
+    <div class="agent-popup-card" id="agent-popup-card">
+      <div class="popup-header">
+        <div class="popup-title">
+          <span class="status-dot online"></span>
+          <span>AI Agent</span>
+        </div>
+        <button class="popup-close-btn" id="agent-popup-close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="popup-body">
+        <div class="popup-actions">
+          <button class="popup-btn" id="agent-btn-clipboard">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            <span>Analyze Clipboard</span>
+          </button>
+          <button class="popup-btn" id="agent-btn-screenshot">
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+            <span>Analyze Screenshot</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Zeno Agent Mode Extension Required Modal -->
+  <div class="modal-overlay" id="extension-modal">
+    <div class="extension-modal-card">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <div class="extension-modal-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="extension-title-icon"><path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path></svg>
+          </div>
+          <h3 class="modal-title">🚀 Zeno Agent Mode Requires Extension</h3>
+        </div>
+        <button class="modal-close-btn" id="extension-modal-close" aria-label="Close Modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <div class="extension-modal-body">
+        <div class="extension-hero-wrap">
+          <div class="extension-hero-glow"></div>
+          <div class="extension-hero-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hero-puzzle-svg"><path d="M20.5 10.5V6.5C20.5 5.39543 19.6046 4.5 18.5 4.5H14.5C14.5 3.11929 13.3807 2 12 2C10.6193 2 9.5 3.11929 9.5 4.5H5.5C4.39543 4.5 3.5 5.39543 3.5 6.5V10.5C4.88071 10.5 6 11.6193 6 13C6 14.3807 4.88071 15.5 3.5 15.5V19.5C3.5 20.6046 4.39543 21.5 5.5 21.5H9.5C9.5 20.1193 10.6193 19 12 19C13.3807 19 14.5 20.1193 14.5 21.5H18.5C19.6046 21.5 20.5 20.6046 20.5 19.5V15.5C19.1193 15.5 18 14.3807 18 13C18 11.6193 19.1193 10.5 20.5 10.5Z"></path></svg>
+          </div>
+        </div>
+
+        <p class="extension-modal-lead">
+          To use <strong>Agent Mode</strong>, please download and install the official <strong>Zeno browser extension</strong>.
+        </p>
+
+        <div class="extension-features-grid">
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">📥</div>
+            <div class="ext-feat-content">
+              <h4>1. Download Extension</h4>
+              <p>Click below to download <code>zeno-extension.zip</code> package directly.</p>
+            </div>
+          </div>
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">📂</div>
+            <div class="ext-feat-content">
+              <h4>2. Extract Zip File</h4>
+              <p>Unzip <code>zeno-extension.zip</code> to a folder on your computer.</p>
+            </div>
+          </div>
+          <div class="ext-feat-card">
+            <div class="ext-feat-icon">🧩</div>
+            <div class="ext-feat-content">
+              <h4>3. Load Unpacked in Chrome</h4>
+              <p>Go to <code>chrome://extensions</code> → Enable <strong>Developer Mode</strong> → Click <strong>Load unpacked</strong> and select the folder.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="extension-detection-status" id="extension-detection-status">
+          <div class="detection-status-left">
+            <span class="detection-dot unverified" id="detection-status-dot"></span>
+            <span class="detection-text" id="detection-status-text">Extension not detected</span>
+          </div>
+          <button type="button" class="detection-check-btn" id="extension-btn-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Check Again</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer extension-modal-footer">
+        <button class="modal-btn secondary" id="extension-btn-cancel">Cancel</button>
+        <a class="modal-btn primary install-extension-btn" id="extension-btn-install" href="zeno-extension.zip" download="zeno-extension.zip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span>Download Zeno Extension (.zip)</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="settings-modal-card tabbed-layout">
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <svg class="modal-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:var(--accent-color);"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          <h3 class="modal-title">Settings</h3>
+        </div>
+        <button class="modal-close-btn" id="settings-modal-close" aria-label="Close Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      
+      <div class="settings-tab-container">
+        <!-- Settings Sidebar Tabs -->
+        <aside class="settings-tabs-sidebar">
+          <button class="settings-tab-btn active" data-target="tab-general">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            <span>General</span>
+          </button>
+          <button class="settings-tab-btn" data-target="tab-provider">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            <span>AI Provider</span>
+          </button>
+          <button class="settings-tab-btn" data-target="tab-shortcuts">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="8" x2="6" y2="8"></line><line x1="10" y1="8" x2="10" y2="8"></line><line x1="14" y1="8" x2="14" y2="8"></line><line x1="18" y1="8" x2="18" y2="8"></line><line x1="6" y1="12" x2="6" y2="12"></line><line x1="10" y1="12" x2="10" y2="12"></line><line x1="14" y1="12" x2="14" y2="12"></line><line x1="18" y1="12" x2="18" y2="12"></line><line x1="7" y1="16" x2="17" y2="16"></line></svg>
+            <span>Keyboard Shortcuts</span>
+          </button>
+          <button class="settings-tab-btn" data-target="tab-appearance">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            <span>Appearance</span>
+          </button>
+          <button class="settings-tab-btn" data-target="tab-about">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>About</span>
+          </button>
+        </aside>
+
+        <!-- Settings Content Areas -->
+        <div class="settings-tab-content-wrapper">
+          <!-- 1. General Settings -->
+          <div class="settings-tab-panel active" id="tab-general">
+            <div class="settings-section-title">General Settings</div>
+            <div class="settings-grid">
+              
+              <!-- Card 1: AI Inference Model -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">AI Inference Model</div>
+                  <div class="settings-card-subtitle">Select the default model configuration for code generation.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <label class="setting-label" for="model-select">Active Model</label>
+                    <select class="setting-control" id="model-select">
+                      <option value="zeno-3.5-pro">Zeno 3.5 Pro (Recommended)</option>
+                      <option value="zeno-3.5-flash">Zeno 3.5 Flash</option>
+                      <option value="zeno-3.0-ultra">Zeno 3.0 Ultra (Legacy)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Creativity & Precision -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Creativity &amp; Precision</div>
+                  <div class="settings-card-subtitle">Adjust the temperature of response generations.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <label class="setting-label" for="temp-slider">Model Temperature (Value: <span id="temp-val">0.2</span>)</label>
+                    <div class="slider-wrapper">
+                      <span class="slider-label">Precise</span>
+                      <input type="range" class="slider-control" id="temp-slider" min="0" max="1" step="0.1" value="0.2">
+                      <span class="slider-label">Creative</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 3: Performance Settings -->
+              <div class="settings-card full-width">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Performance &amp; Effects</div>
+                  <div class="settings-card-subtitle">Toggle advanced rendering features.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <div class="checkbox-option">
+                      <label class="toggle-switch small">
+                        <input type="checkbox" id="pref-animations" checked>
+                        <span class="slider"></span>
+                      </label>
+                      <div class="option-text-wrapper">
+                        <span class="option-title">Enable Glassmorphism &amp; UI Animations</span>
+                        <span class="option-desc">Enables blur backdrops and transition effects on high-end hardware.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. AI Provider Settings -->
+          <div class="settings-tab-panel" id="tab-provider">
+            <div class="settings-section-title">AI Provider Config</div>
+            <div class="settings-grid">
+              
+              <!-- Card 1: API Credentials -->
+              <div class="settings-card full-width">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">API Credentials</div>
+                  <div class="settings-card-subtitle">Manage credentials and secret keys for supported AI services.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <label class="setting-label" for="provider-select">Select Provider</label>
+                    <select class="setting-control" id="provider-select">
+                      <option value="gemini">Gemini API (Recommended)</option>
+                      <option value="groq">Groq API</option>
+                      <option value="openai">OpenAI API</option>
+                      <option value="openrouter">OpenRouter API</option>
+                      <option value="cohere">Cohere API</option>
+                    </select>
+                  </div>
+                  <div class="setting-group">
+                    <label class="setting-label" for="provider-key-input">API Secret Key</label>
+                    <input type="password" class="setting-control input-text" id="provider-key-input" placeholder="Paste your API key here...">
+                    <p class="provider-key-note">Get your key from the provider's website. Leave blank to use server environment variables (if backend is running).</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Connection Status -->
+              <div class="settings-card full-width">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Connection Diagnostic</div>
+                  <div class="settings-card-subtitle">Validate connection status between client, backend, and provider.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="provider-status-group" style="display:flex;align-items:center;justify-content:space-between;width:100%;background:rgba(15,23,42,0.4);border:1px solid var(--border-color);border-radius:12px;padding:1rem;">
+                    <div class="provider-status-row" style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;">
+                      <span class="status-label">Connection:</span>
+                      <span class="provider-status-badge unknown" id="provider-status-badge" style="padding:0.25rem 0.65rem;border-radius:8px;font-size:0.75rem;font-weight:600;">Unknown</span>
+                    </div>
+                    <button class="modal-btn primary test-btn" id="provider-test-btn" style="padding:0.5rem 1rem;">Test Connection</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 3. Keyboard Shortcuts -->
+          <div class="settings-tab-panel" id="tab-shortcuts">
+            <div class="settings-section-title">Keyboard Shortcuts</div>
+            <div class="settings-grid">
+              
+              <div class="settings-card full-width">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Key Mapping Reference</div>
+                  <div class="settings-card-subtitle">Use these keybindings to accelerate your workflow.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="shortcuts-table">
+                    <div class="shortcut-row">
+                      <span class="shortcut-desc">Analyze Clipboard text</span>
+                      <span class="shortcut-key">Ctrl + V</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <span class="shortcut-desc">Screenshot capture &amp; OCR</span>
+                      <span class="shortcut-key">Ctrl + Shift + S</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <span class="shortcut-desc">Submit prompt message</span>
+                      <span class="shortcut-key">Ctrl + Enter</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 4. Appearance Settings -->
+          <div class="settings-tab-panel" id="tab-appearance">
+            <div class="settings-section-title">Appearance Settings</div>
+            <div class="settings-grid">
+              
+              <!-- Card 1: Visual Theme Mode -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Visual Theme Mode</div>
+                  <div class="settings-card-subtitle">Select dark or light color theme mode.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <label class="setting-label" for="theme-select">Theme Style</label>
+                    <select class="setting-control" id="theme-select">
+                      <option value="dark">Dark Theme (Default)</option>
+                      <option value="light">Light Theme</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card 2: Accent Themes -->
+              <div class="settings-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title">Visual Accent Color</div>
+                  <div class="settings-card-subtitle">Select the accent theme color.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="setting-group">
+                    <label class="setting-label">Accent Swatch</label>
+                    <!-- Hidden trigger to prevent app.js click-toggle listener errors -->
+                    <button class="settings-toggle-trigger" id="theme-bar-toggle-btn" style="display:none;"></button>
+                    <!-- Actual Swatches -->
+                    <div class="color-picker-container" id="color-picker-container" style="display:flex;gap:10px;margin-top:8px;">
+                      <button class="color-swatch blue active" data-color="blue" title="Blue"></button>
+                      <button class="color-swatch pink" data-color="pink" title="Pink"></button>
+                      <button class="color-swatch red" data-color="red" title="Red"></button>
+                      <button class="color-swatch black" data-color="black" title="Black"></button>
+                      <button class="color-swatch violet" data-color="violet" title="Violet"></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 5. About Settings -->
+          <div class="settings-tab-panel" id="tab-about">
+            <div class="settings-section-title">About Zeno</div>
+            <div class="settings-grid">
+              
+              <div class="settings-card full-width">
+                <div class="settings-card-header" style="align-items:center;text-align:center;padding:1.5rem 0;">
+                  <img src="assets/brain_logo.png" style="width:72px;height:72px;margin-bottom:12px;filter:drop-shadow(0 0 12px var(--accent-color));" alt="Zeno logo">
+                  <div class="settings-card-title" style="font-size:1.5rem;font-weight:800;letter-spacing:1px;background:linear-gradient(135deg,#fff 0%,#a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">ZENO AI ASSISTANT</div>
+                  <div class="settings-card-subtitle" style="font-size:0.9rem;">Your intelligent, minimal code companion.</div>
+                </div>
+                <div class="settings-card-body">
+                  <div class="about-info-table" style="display:flex;flex-direction:column;gap:12px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;width:100%;">
+                    <div class="about-row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text-muted);">Version</span><span style="font-family:monospace;font-weight:bold;color:#fff;">3.5.1</span></div>
+                    <div class="about-row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text-muted);">Engine</span><span style="font-family:monospace;font-weight:bold;color:#fff;">Zeno Neural Core</span></div>
+                    <div class="about-row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text-muted);">Build Date</span><span style="font-family:monospace;font-weight:bold;color:#fff;">2026.07.13</span></div>
+                    <div class="about-row" style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text-muted);">License</span><span style="font-family:monospace;font-weight:bold;color:#fff;">ISC License (Portable Core)</span></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="modal-btn secondary" id="settings-reset-btn">Reset Defaults</button>
+        <button class="modal-btn primary" id="settings-save-btn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Load Custom Script Modules -->
+  <script src="js/api-client.js?v=20"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/providers.js"></script>
+  <script src="js/chat-engine.js?v=10"></script>
+  <script src="js/voice-engine.js"></script>
+  <script src="js/background.js?v=12"></script>
+  <script src="js/agent-mode.js?v=35"></script>
+  <script src="js/modes.js?v=5"></script>
+  
+  <script src="app.js?v=40"></script>
+
+  <script>
+    // Login screen — exact same canvas particle + network animation as the home screen
+    document.addEventListener("DOMContentLoaded", function () {
+      var container = document.getElementById("login-particles");
+      if (!container) return;
+
+      // Create canvas inside the login-particles div
+      var canvas = document.createElement("canvas");
+      canvas.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;display:block;";
+      container.appendChild(canvas);
+
+      var ctx = canvas.getContext("2d");
+      var particles = [];
+      var glowCircles = [];
+      var animId;
+
+      function resize() {
+        canvas.width  = container.offsetWidth  || window.innerWidth;
+        canvas.height = container.offsetHeight || window.innerHeight;
+      }
+
+      function build() {
+        particles   = [];
+        glowCircles = [];
+        var W = canvas.width, H = canvas.height;
+
+        // Particles — same count formula as background.js
+        var count = Math.min(70, Math.floor((W * H) / 18000));
+        for (var i = 0; i < count; i++) {
+          particles.push({
+            x:      Math.random() * W,
+            y:      Math.random() * H,
+            radius: Math.random() * 1.5 + 1.0,
+            vx:     (Math.random() - 0.5) * 0.4,
+            vy:     (Math.random() - 0.5) * 0.4,
+            alpha:  Math.random() * 0.4 + 0.3
+          });
+        }
+
+        // Glow circles — same as background.js
+        var gcColors = [
+          "rgba(99,102,241,0.06)",
+          "rgba(6,182,212,0.05)",
+          "rgba(139,92,246,0.05)"
+        ];
+        for (var j = 0; j < 8; j++) {
+          glowCircles.push({
+            x:      Math.random() * W,
+            y:      Math.random() * H,
+            radius: Math.random() * 120 + 80,
+            vx:     (Math.random() - 0.5) * 0.05,
+            vy:     (Math.random() - 0.5) * 0.05,
+            color:  gcColors[j % gcColors.length]
+          });
+        }
+      }
+
+      function draw() {
+        var W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        // Radial gradient overlay
+        var rg = ctx.createRadialGradient(W/2, H/2, 10, W/2, H/2, Math.max(W,H)*0.8);
+        rg.addColorStop(0, "rgba(10,15,45,0.1)");
+        rg.addColorStop(1, "rgba(3,5,20,0.4)");
+        ctx.fillStyle = rg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Glow circles
+        for (var g = 0; g < glowCircles.length; g++) {
+          var gc = glowCircles[g];
+          gc.x += gc.vx; gc.y += gc.vy;
+          if (gc.x < -gc.radius)      gc.x = W + gc.radius;
+          if (gc.x > W + gc.radius)   gc.x = -gc.radius;
+          if (gc.y < -gc.radius)      gc.y = H + gc.radius;
+          if (gc.y > H + gc.radius)   gc.y = -gc.radius;
+
+          var gg = ctx.createRadialGradient(gc.x,gc.y,0, gc.x,gc.y,gc.radius);
+          gg.addColorStop(0, gc.color);
+          gg.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.beginPath();
+          ctx.arc(gc.x, gc.y, gc.radius, 0, Math.PI*2);
+          ctx.fillStyle = gg;
+          ctx.fill();
+        }
+
+        // Particles + network lines
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
+
+          for (var j = i+1; j < particles.length; j++) {
+            var p2 = particles[j];
+            var dx = p.x-p2.x, dy = p.y-p2.y;
+            var distSq = dx*dx + dy*dy;
+            if (distSq < 140*140) {
+              var dist = Math.sqrt(distSq);
+              var op = (1 - dist/140) * 0.4;
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = "rgba(180,200,255," + op + ")";
+              ctx.lineWidth = 0.8;
+              ctx.stroke();
+            }
+          }
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+          ctx.fillStyle = "rgba(220,230,255," + p.alpha + ")";
+          ctx.fill();
+        }
+
+        animId = requestAnimationFrame(draw);
+      }
+
+      resize();
+      build();
+      draw();
+      window.addEventListener("resize", function(){ resize(); build(); });
+    });
+  </script>
+</body>
+</html>
