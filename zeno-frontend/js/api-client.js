@@ -67,7 +67,7 @@ async function callWithQuotaRotation(providerFn, args) {
 const DirectProviders = {
   async gemini(opts) {
     return callWithQuotaRotation(async ({ message, apiKey, systemPrompt, chatHistory = [], imageBase64 }) => {
-      const model = 'gemini-2.0-flash';
+      const model = 'gemini-2.5-flash';
       const url   = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
       const contents = [];

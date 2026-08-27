@@ -18,17 +18,8 @@ const PORT = process.env.PORT || 5000;
 // ── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (file://, Postman, etc.), localhost and extensions
-    if (
-      !origin || 
-      origin.startsWith('http://localhost') || 
-      origin.startsWith('http://127.0.0.1') || 
-      origin.startsWith('null') ||
-      origin.startsWith('chrome-extension://')
-    ) {
-      return callback(null, true);
-    }
-    callback(new Error('Not allowed by CORS'));
+    // Allow all origins (Vercel frontend, localhost, Render, extensions, Postman)
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
