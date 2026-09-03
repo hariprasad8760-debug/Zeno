@@ -1,8 +1,14 @@
 // Content script running on all webpages to inject the floating assistant widget
 
 (function() {
-  // Prevent duplicate injections
-  if (document.getElementById('zeno-floating-assistant-root')) return;
+  // Prevent duplicate injections or injecting into the Zeno web application itself
+  if (
+    document.getElementById('zeno-floating-assistant-root') ||
+    document.getElementById('agent-mode-toggle') ||
+    document.querySelector('.agent-mode-panel') ||
+    document.querySelector('.zeno-app-wrapper') ||
+    document.documentElement.dataset.zenoApp === 'true'
+  ) return;
 
   // 1. Create a Shadow DOM container to isolate styles from the parent website
   const root = document.createElement('div');
@@ -31,7 +37,7 @@
       position: fixed;
       right: 24px;
       bottom: 24px;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: flex-end;
       gap: 12px;
@@ -749,21 +755,21 @@
 
   // Dynamically sync agentMode state from storage
   chrome.storage.local.get(['agentMode'], (data) => {
-    if (data.agentMode === 'false') {
-      container.style.display = 'none';
-    } else {
+    if (data && (data.agentMode === 'true' || data.agentMode === true)) {
       container.style.display = 'flex';
+    } else {
+      container.style.display = 'none';
     }
   });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local' && changes.agentMode) {
-      if (changes.agentMode.newValue === 'false') {
+      if (changes.agentMode.newValue === 'true' || changes.agentMode.newValue === true) {
+        container.style.display = 'flex';
+      } else {
         container.style.display = 'none';
         floatingMenu.style.display = 'none';
         panel.classList.remove('open');
-      } else {
-        container.style.display = 'flex';
       }
     }
   });

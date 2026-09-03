@@ -363,6 +363,9 @@ window.ZenoAgentMode = {
         }
 
         localStorage.setItem('zeno_agent_mode', this.isEnabled);
+        try {
+          window.postMessage({ source: 'zeno-web', type: 'ZENO_SYNC_SETTINGS', agentMode: String(this.isEnabled) }, '*');
+        } catch (err) {}
         this.updateUI(newToggle, descEl, floatBtnContainer);
       });
     }
@@ -371,12 +374,18 @@ window.ZenoAgentMode = {
   enable() {
     this.isEnabled = true;
     localStorage.setItem('zeno_agent_mode', 'true');
+    try {
+      window.postMessage({ source: 'zeno-web', type: 'ZENO_SYNC_SETTINGS', agentMode: 'true' }, '*');
+    } catch (err) {}
     this.updateUI(this.toggleEl, this.descEl, this.floatBtnContainer);
   },
 
   disable() {
     this.isEnabled = false;
     localStorage.setItem('zeno_agent_mode', 'false');
+    try {
+      window.postMessage({ source: 'zeno-web', type: 'ZENO_SYNC_SETTINGS', agentMode: 'false' }, '*');
+    } catch (err) {}
     this.updateUI(this.toggleEl, this.descEl, this.floatBtnContainer);
   },
 

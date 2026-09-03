@@ -17,26 +17,13 @@
   "content_scripts": [
     {
       "matches": [
-        "http://localhost:5000/*",
-        "http://127.0.0.1:5000/*",
-        "http://localhost:3000/*",
-        "http://127.0.0.1:3000/*",
-        "http://localhost:*/*",
-        "http://127.0.0.1:*/*"
+        "<all_urls>"
       ],
       "js": ["zeno-web-content.js"],
       "run_at": "document_start"
     },
     {
       "matches": ["<all_urls>"],
-      "exclude_matches": [
-        "http://localhost:5000/*",
-        "http://127.0.0.1:5000/*",
-        "http://localhost:3000/*",
-        "http://127.0.0.1:3000/*",
-        "http://localhost:*/*",
-        "http://127.0.0.1:*/*"
-      ],
       "js": [
         "lib/purify.min.js",
         "lib/marked.min.js",
@@ -56,7 +43,14 @@
       "matches": ["<all_urls>"]
     }
   ],
+  "icons": {
+    "16": "brain_logo.png",
+    "48": "brain_logo.png",
+    "128": "brain_logo.png"
+  },
   "action": {
-    "default_title": "Zeno AI"
+    "default_title": "Zeno AI Assistant",
+    "default_popup": "popup.html",
+    "default_icon": "brain_logo.png"
   }
 }
