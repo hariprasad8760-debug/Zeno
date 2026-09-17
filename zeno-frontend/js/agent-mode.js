@@ -431,12 +431,13 @@ window.ZenoAgentMode = {
 
     if (this._searchTimeout) clearTimeout(this._searchTimeout);
 
-    if (showNotification) {
+    // Only show notification banner when enabling Agent Mode
+    if (showNotification && this.isEnabled) {
       // Build top notification banner
       const notif = document.createElement('div');
       notif.className = 'agent-notif-banner-bw';
       notif.innerHTML = `
-        <span class="agent-notif-bw-text">● Agent Mode ${this.isEnabled ? 'ON' : 'OFF'}</span>
+        <span class="agent-notif-bw-text">● Agent Mode ON</span>
       `;
       document.body.appendChild(notif);
 
@@ -450,8 +451,12 @@ window.ZenoAgentMode = {
     if (floatContainer) {
       if (this.isEnabled) {
         floatContainer.classList.add('visible');
+        floatContainer.style.display = 'flex';
       } else {
         floatContainer.classList.remove('visible');
+        floatContainer.style.display = 'none';
+        const popup = document.getElementById('agent-popup-card');
+        if (popup) popup.classList.remove('show');
       }
     }
   },

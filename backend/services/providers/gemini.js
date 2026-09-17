@@ -29,9 +29,18 @@ async function chat({ message, systemPrompt, chatHistory = [], imageBase64, apiK
   // Build current user message parts
   const parts = [];
   if (imageBase64) {
-    parts.push({ inlineData: { mimeType: 'image/png', data: imageBase64 } });
+    let cleanBase64 = String(imageBase64).trim();
+    let mimeType = 'image/png';
+    const match = cleanBase64.match(/^data:(image\/[a-zA-Z0-9.+_-]+);base64,(.+)$/s);
+    if (match) {
+      mimeType = match[1];
+      cleanBase64 = match[2];
+    }
+    // Remove any newlines or whitespace in base64 string
+    cleanBase64 = cleanBase64.replace(/\s+/g, '');
+    parts.push({ inlineData: { mimeType, data: cleanBase64 } });
   }
-  parts.push({ text: message || 'Analyze this image. Specifically read, transcribe, and analyze any text, code, logs, or error messages visible in the screenshot.' });
+  parts.push({ text: message || 'Analyze this image in detail. Read, transcribe, and analyze any code, text, diagrams, UI elements, or error messages visible.' });
   contents.push({ role: 'user', parts });
 
   const body = {

@@ -30,7 +30,8 @@ window.ZenoChatEngine = {
       if (msg.image) {
         const imgWrap = document.createElement('div');
         imgWrap.className = 'message-image-wrap';
-        imgWrap.innerHTML = `<img src="${msg.image}" alt="Uploaded image" class="chat-uploaded-img">`;
+        const imgSrc = msg.image.startsWith('data:') ? msg.image : `data:image/png;base64,${msg.image}`;
+        imgWrap.innerHTML = `<img src="${imgSrc}" alt="Uploaded image" class="chat-uploaded-img" title="Click to view full size">`;
         content.appendChild(imgWrap);
       }
     } else {

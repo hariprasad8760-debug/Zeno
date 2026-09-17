@@ -41,6 +41,7 @@ app.use(express.static(path.join(__dirname, '..')));
 app.use('/api/auth',      authRoutes);
 app.use('/api/chat',      aiRoutes);
 app.use('/api/ocr',       ocrRoutes);
+app.use('/api/image',     require('./routes/image'));
 
 // ── Provider test endpoint (direct on server for simplicity) ─────────────────
 app.use('/api/providers', require('./routes/providers'));

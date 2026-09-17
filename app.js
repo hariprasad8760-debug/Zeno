@@ -53,6 +53,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const fileInput = document.getElementById("file-input");
   const fileAttachmentBadge = document.getElementById("file-attachment-badge");
 
+  // Image Preview & Analysis Elements
+  const imagePreviewBar = document.getElementById("image-preview-bar");
+  const imagePreviewThumb = document.getElementById("image-preview-thumb");
+  const imagePreviewRemove = document.getElementById("image-preview-remove");
+  const imagePreviewFilename = document.getElementById("image-preview-filename");
+  const headerBtnImgGen = document.getElementById("header-btn-imggen");
+  const cardImgGen = document.getElementById("card-imggen");
+
+  // Image Lightbox Modal Elements
+  const imageLightboxModal = document.getElementById("image-lightbox-modal");
+  const lightboxBackdrop = document.getElementById("lightbox-backdrop");
+  const lightboxImg = document.getElementById("lightbox-img");
+  const lightboxClose = document.getElementById("lightbox-close");
+  const lightboxDownload = document.getElementById("lightbox-download");
+
   // Floating AI Agent Bottom-Left
   const floatingAgentContainer = document.getElementById("floating-agent-container");
   const floatingAgentBtn = document.getElementById("floating-agent-btn");
@@ -98,7 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const MODE_META = {
     explain: { icon: "🔍", label: "Explain Error Mode", apiMode: "explain_error" },
     optimize: { icon: "⚡", label: "Optimize Code Mode", apiMode: "optimize" },
-    debug: { icon: "🐛", label: "Debug Mode", apiMode: "debug" }
+    debug: { icon: "🐛", label: "Debug Mode", apiMode: "debug" },
+    image_generate: { icon: "🎨", label: "Generate Image Mode", apiMode: "image_generate" }
   };
 
   function showModeBanner(mode) {
@@ -1219,7 +1235,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If activeChatId is null, automatically create one
     if (activeChatId === null) {
-      const newChat = window.ZenoStorage.createChat(text.slice(0, 30) || "Image Analysis");
+      let chatTitle = text ? text.slice(0, 30) : (activeMode === 'image_generate' ? 'Generated Image' : 'Image Analysis');
+      const newChat = window.ZenoStorage.createChat(chatTitle);
       activeChatId = newChat.id;
       renderChatHistory();
     }
@@ -1232,12 +1249,15 @@ document.addEventListener("DOMContentLoaded", () => {
       emptyState.style.display = "flex"; // Ensure it stays visible
     }
 
+    // Determine query text
+    const queryText = text || (attachedImageBase64 ? "Please analyze this image in detail and describe what you see, including any text, code, diagrams, or errors." : "");
+
     // Append User message to storage and feed
     const userMsg = {
       id: Date.now(),
       role: "user",
-      content: text,
-      image: attachedImageBase64 ? `data:image/png;base64,${attachedImageBase64}` : null
+      content: queryText,
+      image: attachedImageBase64 || null
     };
 
     chat.messages.push(userMsg);
@@ -1247,10 +1267,14 @@ document.addEventListener("DOMContentLoaded", () => {
     messagesList.appendChild(userBubble);
     window.ZenoChatEngine.scrollToBottom(chatContainer);
 
+    const imageToSend = attachedImageBase64;
+    clearAttachedImage();
+
+    // Determine mode to call
+    const currentModeType = activeMode === 'image_generate' ? 'image_generate' : (activeMode ? (MODE_META[activeMode]?.apiMode || 'chat') : 'chat');
+
     // Call API Backend
-    await callBackendAI(chat, text, attachedImageBase64);
-    attachedImageBase64 = null;
-    fileAttachmentBadge.textContent = "";
+    await callBackendAI(chat, queryText, imageToSend, currentModeType);
   }
 
   async function callBackendAI(chatObj, textPrompt, imageBase64Data = null, modeType = "chat") {
@@ -1387,20 +1411,159 @@ document.addEventListener("DOMContentLoaded", () => {
 
   sendBtn.addEventListener("click", handleSendRequest);
 
-  // File attachments uploads handlers
+  // ── Image Attachment & Preview Handlers ────────────────────────────────────
+  function setAttachedImage(dataUrl, fileName = "image.png") {
+    attachedImageBase64 = dataUrl;
+    if (imagePreviewThumb) imagePreviewThumb.src = dataUrl;
+    if (imagePreviewFilename) imagePreviewFilename.textContent = fileName;
+    if (imagePreviewBar) imagePreviewBar.style.display = "block";
+    if (fileAttachmentBadge) fileAttachmentBadge.textContent = "📎 " + fileName;
+    sendBtn.disabled = false;
+  }
+
+  function clearAttachedImage() {
+    attachedImageBase64 = null;
+    if (fileInput) fileInput.value = "";
+    if (imagePreviewThumb) imagePreviewThumb.src = "";
+    if (imagePreviewBar) imagePreviewBar.style.display = "none";
+    if (fileAttachmentBadge) fileAttachmentBadge.textContent = "";
+    sendBtn.disabled = !promptInput.value.trim();
+  }
+
+  if (imagePreviewRemove) {
+    imagePreviewRemove.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      clearAttachedImage();
+    });
+  }
+
+  // File picker button
   if (attachBtn && fileInput) {
     attachBtn.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
+      if (!file.type.startsWith("image/")) {
+        pushSystemNotification("Please select an image file (PNG, JPG, WebP, etc.)");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (event) => {
-        attachedImageBase64 = event.target.result.split(',')[1];
-        fileAttachmentBadge.textContent = "📎 Image attached";
-        sendBtn.disabled = false;
+        setAttachedImage(event.target.result, file.name);
+        pushSystemNotification(`Attached: ${file.name}`);
       };
       reader.readAsDataURL(file);
+    });
+  }
+
+  // Clipboard Paste support (Ctrl+V into prompt input)
+  promptInput.addEventListener("paste", (e) => {
+    const items = (e.clipboardData || window.clipboardData)?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf("image") !== -1) {
+        e.preventDefault();
+        const blob = items[i].getAsFile();
+        if (blob) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setAttachedImage(event.target.result, "clipboard-screenshot.png");
+            pushSystemNotification("Image pasted from clipboard");
+          };
+          reader.readAsDataURL(blob);
+        }
+        break;
+      }
+    }
+  });
+
+  // Drag and drop image files onto footer/workspace
+  const footerEl = document.querySelector(".workspace-footer");
+  if (footerEl) {
+    ['dragenter', 'dragover'].forEach(eventName => {
+      footerEl.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        footerEl.classList.add("drag-over");
+      });
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+      footerEl.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        footerEl.classList.remove("drag-over");
+      });
+    });
+    footerEl.addEventListener("drop", (e) => {
+      const files = e.dataTransfer?.files;
+      if (files && files.length > 0 && files[0].type.startsWith("image/")) {
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          setAttachedImage(event.target.result, file.name);
+          pushSystemNotification(`Attached: ${file.name}`);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // ── Lightbox Modal for Chat Images ─────────────────────────────────────────
+  document.addEventListener("click", (e) => {
+    const target = e.target;
+    if (target && target.tagName === "IMG" && (target.classList.contains("chat-uploaded-img") || target.closest(".message-content") || target.closest(".message-image-wrap"))) {
+      if (target.classList.contains("zeno-logo-img") || target.classList.contains("header-brain-logo") || target.id === "image-preview-thumb") return;
+      if (imageLightboxModal && lightboxImg) {
+        lightboxImg.src = target.src;
+        if (lightboxDownload) lightboxDownload.href = target.src;
+        imageLightboxModal.style.display = "flex";
+      }
+    }
+  });
+
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", () => {
+      if (imageLightboxModal) imageLightboxModal.style.display = "none";
+    });
+  }
+  if (lightboxBackdrop) {
+    lightboxBackdrop.addEventListener("click", () => {
+      if (imageLightboxModal) imageLightboxModal.style.display = "none";
+    });
+  }
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && imageLightboxModal && imageLightboxModal.style.display === "flex") {
+      imageLightboxModal.style.display = "none";
+    }
+  });
+
+  // ── Generate Image Mode Button & Card Triggers ─────────────────────────────
+  if (headerBtnImgGen) {
+    headerBtnImgGen.addEventListener("click", () => {
+      if (activeMode === "image_generate") {
+        hideModeBanner();
+        headerBtnImgGen.classList.remove("active");
+        promptInput.placeholder = "Ask Zeno anything or paste your code...";
+      } else {
+        document.querySelectorAll(".header-mode-btn").forEach(b => b.classList.remove("active"));
+        headerBtnImgGen.classList.add("active");
+        showModeBanner("image_generate");
+        promptInput.placeholder = "Describe the image you want to generate (e.g. Cyberpunk city at night, 8k)...";
+        promptInput.focus();
+      }
+    });
+  }
+
+  if (cardImgGen) {
+    cardImgGen.addEventListener("click", () => {
+      document.querySelectorAll(".header-mode-btn").forEach(b => b.classList.remove("active"));
+      if (headerBtnImgGen) headerBtnImgGen.classList.add("active");
+      showModeBanner("image_generate");
+      promptInput.placeholder = "Describe the image you want to generate (e.g. Cyberpunk city at night, 8k)...";
+      promptInput.focus();
     });
   }
 
