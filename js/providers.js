@@ -15,7 +15,7 @@ window.ZenoProviders = {
   },
 
   getActiveProvider() {
-    return localStorage.getItem('zeno_active_provider') || 'gemini';
+    return localStorage.getItem('zeno_active_provider') || 'groq';
   },
 
   setActiveProvider(providerId) {

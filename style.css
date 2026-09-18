@@ -1524,13 +1524,20 @@ html[data-accent-theme="violet"] .action-card:hover .card-icon { background: rgb
   border-radius: 24px;
   padding: 0.65rem 1.15rem;
   display: flex;
-  flex-direction: row;
-  align-items: flex-end;
-  gap: 0.85rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
   max-width: 820px;
   width: 100%;
   margin: 0 auto;
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+.input-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 0.85rem;
+  width: 100%;
 }
 .input-container:hover, .input-container:focus-within {
   border-color: var(--border-glow);
@@ -5656,15 +5663,10 @@ body.cascade-5 .floating-agent-container {
   height: 16px;
 }
 
-/* Image Generation Mode Card & Button Colors */
-.card-icon.imggen-icon {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2));
-  color: #ec4899;
-}
-.header-mode-btn[data-mode="image_generate"].active {
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  color: #fff;
-  box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
+/* Analyze Image Mode Card Color */
+.card-icon.analyze-icon {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+  color: var(--accent-color);
 }
 
 /* =============================================================================

@@ -14,16 +14,23 @@ function buildMessages(message, systemPrompt, chatHistory, imageBase64) {
   const msgs = [];
   if (systemPrompt) msgs.push({ role: 'system', content: systemPrompt });
 
-  for (const h of chatHistory.slice(-10)) {
-    msgs.push({ role: h.role, content: h.content });
+  const rawHistory = Array.isArray(chatHistory) ? chatHistory.slice(-10) : [];
+  const historyToUse = (rawHistory.length > 0 && rawHistory[rawHistory.length - 1].role === 'user')
+    ? rawHistory.slice(0, -1)
+    : rawHistory;
+
+  for (const h of historyToUse) {
+    if (h.content) msgs.push({ role: h.role, content: h.content });
   }
 
   if (imageBase64) {
+    let clean = String(imageBase64).trim();
+    let url = clean.startsWith('data:') ? clean : `data:image/png;base64,${clean.replace(/\s+/g, '')}`;
     msgs.push({
       role: 'user',
       content: [
-        { type: 'image_url', image_url: { url: `data:image/png;base64,${imageBase64}` } },
-        { type: 'text', text: message || 'Analyze this image.' }
+        { type: 'image_url', image_url: { url } },
+        { type: 'text', text: message || 'Analyze this image in detail.' }
       ]
     });
   } else {

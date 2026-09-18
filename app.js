@@ -58,8 +58,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const imagePreviewThumb = document.getElementById("image-preview-thumb");
   const imagePreviewRemove = document.getElementById("image-preview-remove");
   const imagePreviewFilename = document.getElementById("image-preview-filename");
-  const headerBtnImgGen = document.getElementById("header-btn-imggen");
-  const cardImgGen = document.getElementById("card-imggen");
+
+  // Profile Image Settings Elements
+  const settingsProfilePreview = document.getElementById("settings-profile-preview");
+  const settingsUploadProfileBtn = document.getElementById("settings-upload-profile-btn");
+  const settingsProfileFileInput = document.getElementById("settings-profile-file-input");
+  const settingsResetProfileBtn = document.getElementById("settings-reset-profile-btn");
 
   // Image Lightbox Modal Elements
   const imageLightboxModal = document.getElementById("image-lightbox-modal");
@@ -113,8 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const MODE_META = {
     explain: { icon: "🔍", label: "Explain Error Mode", apiMode: "explain_error" },
     optimize: { icon: "⚡", label: "Optimize Code Mode", apiMode: "optimize" },
-    debug: { icon: "🐛", label: "Debug Mode", apiMode: "debug" },
-    image_generate: { icon: "🎨", label: "Generate Image Mode", apiMode: "image_generate" }
+    debug: { icon: "🐛", label: "Debug Mode", apiMode: "debug" }
   };
 
   function showModeBanner(mode) {
@@ -1235,7 +1238,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // If activeChatId is null, automatically create one
     if (activeChatId === null) {
-      let chatTitle = text ? text.slice(0, 30) : (activeMode === 'image_generate' ? 'Generated Image' : 'Image Analysis');
+      let chatTitle = text ? text.slice(0, 30) : 'Image Analysis';
       const newChat = window.ZenoStorage.createChat(chatTitle);
       activeChatId = newChat.id;
       renderChatHistory();
@@ -1252,12 +1255,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // Determine query text
     const queryText = text || (attachedImageBase64 ? "Please analyze this image in detail and describe what you see, including any text, code, diagrams, or errors." : "");
 
+    // Capture image before clearing
+    const imageToSend = attachedImageBase64;
+
     // Append User message to storage and feed
     const userMsg = {
       id: Date.now(),
       role: "user",
       content: queryText,
-      image: attachedImageBase64 || null
+      image: imageToSend || null
     };
 
     chat.messages.push(userMsg);
@@ -1267,11 +1273,10 @@ document.addEventListener("DOMContentLoaded", () => {
     messagesList.appendChild(userBubble);
     window.ZenoChatEngine.scrollToBottom(chatContainer);
 
-    const imageToSend = attachedImageBase64;
     clearAttachedImage();
 
     // Determine mode to call
-    const currentModeType = activeMode === 'image_generate' ? 'image_generate' : (activeMode ? (MODE_META[activeMode]?.apiMode || 'chat') : 'chat');
+    const currentModeType = activeMode ? (MODE_META[activeMode]?.apiMode || 'chat') : 'chat';
 
     // Call API Backend
     await callBackendAI(chat, queryText, imageToSend, currentModeType);
@@ -1295,12 +1300,15 @@ document.addEventListener("DOMContentLoaded", () => {
       const activeProvider = window.ZenoProviders.getActiveProvider();
       const userKey = window.ZenoProviders.getAPIKey(activeProvider);
 
+      // Pass prior messages excluding the current newly pushed message
+      const priorHistory = chatObj.messages.slice(0, -1).slice(-10);
+
       const res = await window.ZenoAPI.chat({
         message: textPrompt,
         mode: modeType,
         provider: activeProvider,
         apiKey: userKey,
-        chatHistory: chatObj.messages.slice(-10), // Pass contextual hist
+        chatHistory: priorHistory,
         imageBase64: imageBase64Data
       });
 
@@ -1540,30 +1548,66 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ── Generate Image Mode Button & Card Triggers ─────────────────────────────
-  if (headerBtnImgGen) {
-    headerBtnImgGen.addEventListener("click", () => {
-      if (activeMode === "image_generate") {
-        hideModeBanner();
-        headerBtnImgGen.classList.remove("active");
-        promptInput.placeholder = "Ask Zeno anything or paste your code...";
-      } else {
-        document.querySelectorAll(".header-mode-btn").forEach(b => b.classList.remove("active"));
-        headerBtnImgGen.classList.add("active");
-        showModeBanner("image_generate");
-        promptInput.placeholder = "Describe the image you want to generate (e.g. Cyberpunk city at night, 8k)...";
-        promptInput.focus();
+
+
+  // ── User Profile Image Management ──────────────────────────────────────────
+  const DEFAULT_PROFILE_AVATAR = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100";
+
+  function applyProfileAvatar(src) {
+    const avatarUrl = src || DEFAULT_PROFILE_AVATAR;
+    document.querySelectorAll(".profile-avatar-img").forEach(img => {
+      img.src = avatarUrl;
+    });
+    if (settingsProfilePreview) {
+      settingsProfilePreview.src = avatarUrl;
+    }
+  }
+
+  // Initialize profile image from localStorage
+  const savedProfileImage = localStorage.getItem("zeno_profile_image");
+  if (savedProfileImage) {
+    applyProfileAvatar(savedProfileImage);
+  }
+
+  // Settings profile image upload from folder
+  if (settingsUploadProfileBtn && settingsProfileFileInput) {
+    settingsUploadProfileBtn.addEventListener("click", () => {
+      settingsProfileFileInput.click();
+    });
+
+    settingsProfileFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        pushSystemNotification("Please select an image file (PNG, JPG, WebP, etc.)");
+        return;
       }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        try {
+          localStorage.setItem("zeno_profile_image", dataUrl);
+          applyProfileAvatar(dataUrl);
+          pushSystemNotification("Profile image updated successfully!");
+        } catch (err) {
+          console.warn("Could not save to localStorage (quota exceeded):", err);
+          applyProfileAvatar(dataUrl);
+          pushSystemNotification("Profile image updated for current session");
+        }
+      };
+      reader.readAsDataURL(file);
     });
   }
 
-  if (cardImgGen) {
-    cardImgGen.addEventListener("click", () => {
-      document.querySelectorAll(".header-mode-btn").forEach(b => b.classList.remove("active"));
-      if (headerBtnImgGen) headerBtnImgGen.classList.add("active");
-      showModeBanner("image_generate");
-      promptInput.placeholder = "Describe the image you want to generate (e.g. Cyberpunk city at night, 8k)...";
-      promptInput.focus();
+  // Settings profile image reset to default
+  if (settingsResetProfileBtn) {
+    settingsResetProfileBtn.addEventListener("click", () => {
+      localStorage.removeItem("zeno_profile_image");
+      applyProfileAvatar(DEFAULT_PROFILE_AVATAR);
+      if (settingsProfileFileInput) settingsProfileFileInput.value = "";
+      pushSystemNotification("Profile image reset to default");
     });
   }
 

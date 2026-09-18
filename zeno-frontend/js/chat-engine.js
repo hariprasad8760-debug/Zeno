@@ -13,7 +13,12 @@ window.ZenoChatEngine = {
     const avatar = document.createElement('div');
     avatar.className = 'message-avatar';
     if (isUser) {
-      avatar.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+      const customProfile = localStorage.getItem('zeno_profile_image');
+      if (customProfile) {
+        avatar.innerHTML = `<img src="${customProfile}" class="profile-avatar-img" alt="User" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      } else {
+        avatar.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+      }
     } else {
       avatar.innerHTML = `<img src="assets/brain_logo.png" class="zeno-logo-img" alt="Zeno" style="width:100%;height:100%;object-fit:cover;">`;
     }

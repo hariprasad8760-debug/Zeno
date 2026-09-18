@@ -53,53 +53,13 @@ window.ZenoAPI = {
       return data.user;
     } catch (err) {
       if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        // Offline / client fallback mode
-        const localUsers = JSON.parse(localStorage.getItem('zeno_local_users') || '[]');
-        const cleanEmail = String(email).trim().toLowerCase();
-        const cleanUsername = String(username || cleanEmail.split('@')[0]).trim().toLowerCase();
-        
-        if (localUsers.some(u => u.email === cleanEmail || u.username === cleanUsername)) {
-          throw new Error('An account with this email or username already exists.');
-        }
-
-        const newUser = {
-          id: `local_${Date.now()}`,
-          name: String(name).trim(),
-          email: cleanEmail,
-          username: cleanUsername,
-          password: String(password)
-        };
-        localUsers.push(newUser);
-        localStorage.setItem('zeno_local_users', JSON.stringify(localUsers));
-        this.setToken(`local_token_${newUser.id}`);
-        return { id: newUser.id, name: newUser.name, email: newUser.email, username: newUser.username };
+        throw new Error('Cannot connect to backend server. Please ensure the server is running.');
       }
       throw err;
     }
   },
 
   async login(username, password) {
-    const cleanIdentifier = String(username).trim().toLowerCase();
-    const MOCK_USERS = [
-      { username: 'harxh',      password: 'zeno123',  name: 'Hariprasad S.', email: 'developer@zeno.ai' },
-      { username: 'hariprasad', password: 'zeno123',  name: 'Hariprasad S.', email: 'developer@zeno.ai' },
-      { username: 'admin',      password: 'admin123', name: 'Admin User',     email: 'admin@zeno.ai'     },
-    ];
-    // Check built-in mock users
-    let match = MOCK_USERS.find(
-      u => (u.username.toLowerCase() === cleanIdentifier || u.email.toLowerCase() === cleanIdentifier) && u.password === password
-    );
-    // Check locally registered offline users
-    if (!match) {
-      const localUsers = JSON.parse(localStorage.getItem('zeno_local_users') || '[]');
-      match = localUsers.find(
-        u => (u.username.toLowerCase() === cleanIdentifier || u.email.toLowerCase() === cleanIdentifier) && u.password === password
-      );
-    }
-    if (match) {
-      this.setToken(`mock_token_${match.username}`);
-      return { name: match.name, email: match.email, username: match.username };
-    }
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -171,9 +131,6 @@ window.ZenoAPI = {
   async checkAuth() {
     const token = this.getToken();
     if (!token) return null;
-    if (token === 'offline_mock_token_harixh') {
-      return { name: 'Hariprasad S.', email: 'developer@zeno.ai', username: 'harixh' };
-    }
     try {
       const res = await fetch(`${API_BASE}/auth/me`, { method: 'GET', headers: this.getHeaders() });
       if (!res.ok) { this.setToken(null); return null; }
@@ -247,34 +204,8 @@ window.ZenoAPI = {
     }
   },
 
-  // ── Image Generation ────────────────────────────────────────────────────────
-  async generateImage({ prompt, width = 1024, height = 1024, style = '' }) {
-    try {
-      const res = await fetch(`${API_BASE}/image/generate`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ prompt, width, height, style })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate image');
-      }
-      return data;
-    } catch (err) {
-      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        // Direct browser fallback if backend is asleep or unreachable
-        const cleanPrompt = encodeURIComponent(prompt.trim());
-        const seed = Math.floor(Math.random() * 10000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
-        return {
-          success: true,
-          imageUrl,
-          prompt: prompt.trim(),
-          response: `Here is your generated image:\n\n![${prompt.trim()}](${imageUrl})\n\n**Prompt:** *${prompt.trim()}*\n\n[⬇️ Click here to open / download full resolution image](${imageUrl})`,
-          mode: 'image_generate'
-        };
-      }
-      throw err;
-    }
+  // ── Image Generation (Disabled) ──────────────────────────────────────────
+  async generateImage() {
+    throw new Error('Image generation is disabled. Zeno specializes in vision and code analysis.');
   }
 };

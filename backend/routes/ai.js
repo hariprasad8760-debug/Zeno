@@ -42,28 +42,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Message or image is required' });
     }
 
-    // Check if mode is image_generate or if prompt requests image generation
-    const isImageGen = mode === 'image_generate' || mode === 'generate_image' || (
-      message && /^\s*(\/image|generate (an? )?image|create (an? )?image|draw (an? )?image|make (an? )?image)\b/i.test(message)
-    );
 
-    if (isImageGen && !imageBase64) {
-      const cleanPrompt = message
-        ? message.replace(/^\s*(\/image|generate (an? )?image of|generate (an? )?image|create (an? )?image of|create (an? )?image|draw (an? )?image of|draw (an? )?image|make (an? )?image of|make (an? )?image)\s*:?\s*/i, '').trim()
-        : 'Futuristic AI neural network glowing in cyber space';
-      
-      const promptToUse = cleanPrompt || 'Futuristic AI neural network glowing in cyber space';
-      const seed = Math.floor(Math.random() * 10000000);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptToUse)}?width=1024&height=1024&nologo=true&seed=${seed}`;
-      const response = `Here is your generated image:\n\n![${promptToUse}](${imageUrl})\n\n**Prompt:** *${promptToUse}*\n\n[⬇️ Click here to open / download full resolution image](${imageUrl})`;
-
-      return res.json({
-        response,
-        provider: 'pollinations',
-        mode: 'image_generate',
-        imageUrl
-      });
-    }
 
     // Build system prompt based on mode
     const systemMsg = systemPrompt || buildSystemPrompt(mode);
@@ -108,11 +87,36 @@ router.post('/', async (req, res) => {
           console.warn(`[Backend Quota Rotation] Provider "${provider}" key #${i + 1} quota exhausted. Switching to key #${i + 2}...`);
           continue;
         }
-        throw err;
+        break;
       }
     }
 
-    if (lastErr) throw lastErr;
+    if (lastErr) {
+      const status = lastErr.response?.status || lastErr.status;
+      const errMsgText = String(lastErr.response?.data?.error?.message || lastErr.message || '').toLowerCase();
+      const isAuthOrQuota = status === 401 || status === 403 || status === 429 || isQuotaError(lastErr) || errMsgText.includes('authentication') || errMsgText.includes('api key');
+
+      if (isAuthOrQuota && provider !== 'groq') {
+        const groqService = providers.get('groq');
+        const groqKey = groqService?.getEnvKey() || process.env.GROQ_API_KEY;
+        if (groqService && groqKey) {
+          console.warn(`[Provider Fallback] Provider "${provider}" failed (${status || 'error'}). Falling back to Groq...`);
+          try {
+            const fallbackRes = await groqService.chat({
+              message,
+              systemPrompt: systemMsg,
+              chatHistory,
+              imageBase64,
+              apiKey: groqKey
+            });
+            return res.json({ response: fallbackRes, provider: 'groq', mode, fallbackFrom: provider });
+          } catch (groqErr) {
+            console.error('[Provider Fallback] Groq fallback failed:', groqErr.message);
+          }
+        }
+      }
+      throw lastErr;
+    }
 
   } catch (err) {
     console.error('[AI Route Error]', err.message);
@@ -133,12 +137,11 @@ When analyzing images, diagrams, error screenshots, or UI mockups:
 - Directly and completely answer the user's question or query about the image.
 - If code errors or bugs are shown, explain the issue and provide the exact fixed code.
 When providing step-by-step explanations, format each step clearly (e.g. Step 1: ..., Step 2: ...) with normal plain text and code blocks.
-Do NOT use LaTeX math symbols, encrypted characters, or raw codes like $4/ for simple steps. Always output clean, normal text.`;
+Do NOT use LaTeX math symbols, encrypted characters, or raw codes like $4/ for simple steps. Always output clean, normal text.
+IMPORTANT: You do NOT generate or synthesize images. Image generation is disabled in Zeno. If a user asks to generate, create, or draw an image, politely inform them that you specialize in image analysis, visual inspection, code, and debugging rather than image generation.`;
 
   const modePrompts = {
     chat: base,
-
-    image_generate: `You are Zeno, an expert AI art and image creator. When the user requests an image, describe the creative process and visual composition vividly.`,
 
     explain_error: `${base}
 

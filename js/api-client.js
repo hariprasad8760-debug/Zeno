@@ -204,34 +204,8 @@ window.ZenoAPI = {
     }
   },
 
-  // ── Image Generation ────────────────────────────────────────────────────────
-  async generateImage({ prompt, width = 1024, height = 1024, style = '' }) {
-    try {
-      const res = await fetch(`${API_BASE}/image/generate`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ prompt, width, height, style })
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate image');
-      }
-      return data;
-    } catch (err) {
-      if (err.message === 'Failed to fetch' || err.name === 'TypeError') {
-        // Direct browser fallback if backend is asleep or unreachable
-        const cleanPrompt = encodeURIComponent(prompt.trim());
-        const seed = Math.floor(Math.random() * 10000000);
-        const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
-        return {
-          success: true,
-          imageUrl,
-          prompt: prompt.trim(),
-          response: `Here is your generated image:\n\n![${prompt.trim()}](${imageUrl})\n\n**Prompt:** *${prompt.trim()}*\n\n[⬇️ Click here to open / download full resolution image](${imageUrl})`,
-          mode: 'image_generate'
-        };
-      }
-      throw err;
-    }
+  // ── Image Generation (Disabled) ──────────────────────────────────────────
+  async generateImage() {
+    throw new Error('Image generation is disabled. Zeno specializes in vision and code analysis.');
   }
 };
